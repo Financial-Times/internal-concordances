@@ -47,7 +47,7 @@ Options:
 curl http://localhost:8080/__health | jq
 ```
 
-## Build and deployment
+## Build and deployment 
 
 * Built by Docker Hub on merge to master: [coco/enriched-concepts](https://hub.docker.com/r/coco/enriched-concepts/)
 * CI provided by CircleCI: [enriched-concepts](https://circleci.com/gh/Financial-Times/enriched-concepts)
