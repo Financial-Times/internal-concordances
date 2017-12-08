@@ -29,4 +29,5 @@ RUN apk --no-cache --virtual .build-dependencies add git \
 
 WORKDIR /
 
+EXPOSE 8080
 CMD [ "/enriched-concepts" ]

@@ -41,13 +41,26 @@ jobs:
   dockerfile:
     working_directory: /enriched-concepts
     docker:
-      - image: docker:1.12.6-git
+      - image: docker:17.09.0-git
     steps:
       - checkout
       - setup_docker_engine
       - run:
           name: Build Dockerfile
-          command: docker build .
+          command: docker build -t test/enriched-concepts:${CIRCLE_BUILD_NUM} .
+  docker_run:
+    docker:
+      - image: alpine
+      - image: test/enriched-concepts:${CIRCLE_BUILD_NUM}
+    steps:
+      - run:
+          name: Update Curl
+          command: |
+            apk update
+            apk add curl
+      - run:
+          name: Test Container
+          command: curl --retry-connrefused --retry 10 --retry-delay 3 http://localhost:8080/__health
   dredd:
     working_directory: /go/src/github.com/Financial-Times/enriched-concepts
     docker:
@@ -69,6 +82,7 @@ jobs:
       - run:
           name: Dredd API Testing
           command: dredd
+
 workflows:
   version: 2
   test-and-build-docker:
@@ -78,3 +92,6 @@ workflows:
       - dockerfile:
           requires:
             - build
+      - docker_run:
+          requires:
+            - dockerfile
