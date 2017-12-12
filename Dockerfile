@@ -1,6 +1,6 @@
 FROM golang:1.8.3-alpine
 
-ENV PROJECT=enriched-concepts
+ENV PROJECT=internal-concordances
 COPY . /${PROJECT}-sources/
 
 RUN apk --no-cache --virtual .build-dependencies add git \
@@ -30,4 +30,4 @@ RUN apk --no-cache --virtual .build-dependencies add git \
 WORKDIR /
 
 EXPOSE 8080
-CMD [ "/enriched-concepts" ]
+CMD [ "/internal-concordances" ]

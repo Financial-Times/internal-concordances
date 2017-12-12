@@ -1,4 +1,4 @@
 apiVersion: v1
-description: enriched-concepts Helm chart for Kubernetes
-name: enriched-concepts
+description: internal-concordances Helm chart for Kubernetes
+name: internal-concordances
 version: 0.0.0  # this entry can be left untouched as it is automatically handled by Jenkins pipeline

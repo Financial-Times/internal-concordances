@@ -4,5 +4,5 @@ service:
   hasOpenAPI: "true"
 replicaCount: 2
 image:
-  repository: coco/enriched-concepts
+  repository: coco/internal-concordances
   pullPolicy: Always

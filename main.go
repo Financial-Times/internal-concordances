@@ -5,8 +5,8 @@ import (
 	"os"
 
 	api "github.com/Financial-Times/api-endpoint"
-	"github.com/Financial-Times/enriched-concepts/health"
 	"github.com/Financial-Times/http-handlers-go/httphandlers"
+	"github.com/Financial-Times/internal-concordances/health"
 	status "github.com/Financial-Times/service-status-go/httphandlers"
 	"github.com/husobee/vestigo"
 	cli "github.com/jawher/mow.cli"
@@ -14,21 +14,21 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const appDescription = "UPP Enriched Concepts"
+const appDescription = "UPP Internal Concordances"
 
 func main() {
-	app := cli.App("enriched-concepts", appDescription)
+	app := cli.App("internal-concordances", appDescription)
 
 	appSystemCode := app.String(cli.StringOpt{
 		Name:   "app-system-code",
-		Value:  "enriched-concepts",
+		Value:  "internal-concordances",
 		Desc:   "System Code of the application",
 		EnvVar: "APP_SYSTEM_CODE",
 	})
 
 	appName := app.String(cli.StringOpt{
 		Name:   "app-name",
-		Value:  "enriched-concepts",
+		Value:  "internal-concordances",
 		Desc:   "Application name",
 		EnvVar: "APP_NAME",
 	})

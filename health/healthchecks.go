@@ -36,7 +36,7 @@ func (service *HealthService) skeletonCheck() fthealth.Check {
 		ID:               "skeleton-healthcheck",
 		BusinessImpact:   "None",
 		Name:             "Skeleton Healthcheck",
-		PanicGuide:       "https://dewey.ft.com/enriched-concepts.html",
+		PanicGuide:       "https://dewey.ft.com/internal-concordances.html",
 		Severity:         1,
 		TechnicalSummary: "The app is not running",
 		Checker:          service.skeletonPingCheck,
@@ -44,7 +44,7 @@ func (service *HealthService) skeletonCheck() fthealth.Check {
 }
 
 func (service *HealthService) skeletonPingCheck() (string, error) {
-	return "UPP enriched-concepts is healthy", nil
+	return "UPP internal-concordances is healthy", nil
 }
 
 // GTG returns the current gtg status

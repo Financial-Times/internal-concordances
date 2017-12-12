@@ -1,6 +1,6 @@
-# Enriched Concepts
+# Internal Concordances
 
-UPP Concepts API which accepts a list of concept ids, concords them, and returns them as an array of standard UPP concepts.
+Internal UPP Concordances API which accepts a list of concept ids, concords them, and returns them as an array of UPP concepts.
 
 ## Installation
 
@@ -8,10 +8,10 @@ Download the source code, dependencies and test dependencies:
 
 ```
 go get -u github.com/kardianos/govendor
-mkdir $GOPATH/src/github.com/Financial-Times/enriched-concepts
+mkdir $GOPATH/src/github.com/Financial-Times/internal-concordances
 cd $GOPATH/src/github.com/Financial-Times
-git clone https://github.com/Financial-Times/enriched-concepts.git
-cd enriched-concepts && govendor sync
+git clone https://github.com/Financial-Times/internal-concordances.git
+cd internal-concordances && govendor sync
 go build .
 ```
 
@@ -28,15 +28,15 @@ go install
 2. Run the binary (using the `help` flag to see the available optional arguments):
 
 ```
-$GOPATH/bin/enriched-concepts [--help]
+$GOPATH/bin/internal-concordances [--help]
 
-Usage: enriched-concepts [OPTIONS]
+Usage: internal-concordances [OPTIONS]
 
-UPP Enriched Concepts
+UPP Internal Concordances
 
 Options:                  
-      --app-system-code   System Code of the application (env $APP_SYSTEM_CODE) (default "enriched-concepts")
-      --app-name          Application name (env $APP_NAME) (default "enriched-concepts")
+      --app-system-code   System Code of the application (env $APP_SYSTEM_CODE) (default "internal-concordances")
+      --app-name          Application name (env $APP_NAME) (default "internal-concordances")
       --port              Port to listen on (env $APP_PORT) (default "8080")
       --api-yml           Location of the API Swagger YML file. (env $API_YML) (default "./api.yml")
 ```
@@ -47,10 +47,10 @@ Options:
 curl http://localhost:8080/__health | jq
 ```
 
-## Build and deployment 
+## Build and deployment
 
-* Built by Docker Hub on merge to master: [coco/enriched-concepts](https://hub.docker.com/r/coco/enriched-concepts/)
-* CI provided by CircleCI: [enriched-concepts](https://circleci.com/gh/Financial-Times/enriched-concepts)
+* Built by Docker Hub on merge to master: [coco/internal-concordances](https://hub.docker.com/r/coco/internal-concordances/)
+* CI provided by CircleCI: [internal-concordances](https://circleci.com/gh/Financial-Times/internal-concordances)
 
 ## Service endpoints
 

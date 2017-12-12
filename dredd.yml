@@ -2,7 +2,7 @@ dry-run: null
 hookfiles: ./api/dredd-hooks.js
 language: nodejs
 sandbox: false
-server: ./enriched-concepts
+server: ./internal-concordances
 server-wait: 3
 init: false
 custom: {}
