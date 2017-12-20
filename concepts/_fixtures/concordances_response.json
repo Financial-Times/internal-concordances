@@ -1,0 +1,44 @@
+{
+   "concordances": [
+      {
+         "concept": {
+            "id": "http://api.ft.com/things/2753c50c-b256-4814-9f0d-65c8e755aa14",
+            "apiUrl": "http://api.ft.com/brands/2753c50c-b256-4814-9f0d-65c8e755aa14"
+         },
+         "identifier": {
+            "authority": "http://api.ft.com/system/FT-TME",
+            "identifierValue": "NjlmOTA1NjEtMGJiMC00MzdmLTlkN2YtNjMwYWVlYTkxYjA2-U2VjdGlvbnM="
+         }
+      },
+      {
+         "concept": {
+            "id": "http://api.ft.com/things/2753c50c-b256-4814-9f0d-65c8e755aa14",
+            "apiUrl": "http://api.ft.com/brands/2753c50c-b256-4814-9f0d-65c8e755aa14"
+         },
+         "identifier": {
+            "authority": "http://api.ft.com/system/UPP",
+            "identifierValue": "6b43a14b-a5e0-3b63-a428-aa55def05fcb"
+         }
+      },
+      {
+         "concept": {
+            "id": "http://api.ft.com/things/2753c50c-b256-4814-9f0d-65c8e755aa14",
+            "apiUrl": "http://api.ft.com/brands/2753c50c-b256-4814-9f0d-65c8e755aa14"
+         },
+         "identifier": {
+            "authority": "http://api.ft.com/system/UPP",
+            "identifierValue": "2753c50c-b256-4814-9f0d-65c8e755aa14"
+         }
+      },
+      {
+         "concept": {
+            "id": "http://api.ft.com/things/2753c50c-b256-4814-9f0d-65c8e755aa14",
+            "apiUrl": "http://api.ft.com/brands/2753c50c-b256-4814-9f0d-65c8e755aa14"
+         },
+         "identifier": {
+            "authority": "http://api.ft.com/system/SMARTLOGIC",
+            "identifierValue": "2753c50c-b256-4814-9f0d-65c8e755aa14"
+         }
+      }
+   ]
+}

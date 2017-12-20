@@ -6,7 +6,9 @@ import (
 
 	api "github.com/Financial-Times/api-endpoint"
 	"github.com/Financial-Times/http-handlers-go/httphandlers"
+	"github.com/Financial-Times/internal-concordances/concepts"
 	"github.com/Financial-Times/internal-concordances/health"
+	"github.com/Financial-Times/internal-concordances/resources"
 	status "github.com/Financial-Times/service-status-go/httphandlers"
 	"github.com/husobee/vestigo"
 	cli "github.com/jawher/mow.cli"
@@ -33,6 +35,20 @@ func main() {
 		EnvVar: "APP_NAME",
 	})
 
+	conceptSearchEndpoint := app.String(cli.StringOpt{
+		Name:   "concept-search-api-endpoint",
+		Value:  "http://concept-search-api/concepts",
+		Desc:   "Endpoint to query for concepts",
+		EnvVar: "CONCEPT_SEARCH_ENDPOINT",
+	})
+
+	publicConcordancesEndpoint := app.String(cli.StringOpt{
+		Name:   "public-concordances-endpoint",
+		Value:  "http://public-concordances-api/concordances",
+		Desc:   "Endpoint to concord ids with",
+		EnvVar: "PUBLIC_CONCORDANCES_ENDPOINT",
+	})
+
 	port := app.String(cli.StringOpt{
 		Name:   "port",
 		Value:  "8080",
@@ -56,7 +72,12 @@ func main() {
 
 		healthService := health.NewHealthService(*appSystemCode, *appName, appDescription)
 
-		serveEndpoints(*port, apiYml, healthService)
+		client := &http.Client{}
+
+		search := concepts.NewSearch(client, *conceptSearchEndpoint)
+		concordances := concepts.NewConcordances(client, *publicConcordancesEndpoint)
+
+		serveEndpoints(*port, apiYml, healthService, search, concordances)
 	}
 
 	err := app.Run(os.Args)
@@ -66,7 +87,7 @@ func main() {
 	}
 }
 
-func serveEndpoints(port string, apiYml *string, healthService *health.HealthService) {
+func serveEndpoints(port string, apiYml *string, healthService *health.HealthService, search concepts.Search, concordances concepts.Concordances) {
 	r := vestigo.NewRouter()
 
 	var monitoringRouter http.Handler = r
@@ -76,6 +97,8 @@ func serveEndpoints(port string, apiYml *string, healthService *health.HealthSer
 	r.Get("/__health", healthService.HealthCheckHandleFunc())
 	r.Get(status.GTGPath, status.NewGoodToGoHandler(healthService.GTG))
 	r.Get(status.BuildInfoPath, status.BuildInfoHandler)
+
+	r.Get("/internalconcordances", resources.InternalConcordances(concordances, search))
 
 	http.Handle("/", monitoringRouter)
 

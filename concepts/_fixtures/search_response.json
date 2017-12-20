@@ -1,0 +1,10 @@
+{
+   "concepts": [
+      {
+         "id": "http://www.ft.com/thing/6b43a14b-a5e0-3b63-a428-aa55def05fcb",
+         "apiUrl": "http://api.ft.com/things/6b43a14b-a5e0-3b63-a428-aa55def05fcb",
+         "prefLabel": "FT Confidential Research",
+         "type": "http://www.ft.com/ontology/Section"
+      }
+   ]
+}
