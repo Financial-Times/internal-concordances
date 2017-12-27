@@ -4,15 +4,17 @@ import (
 	"net/http"
 	"os"
 
-	api "github.com/Financial-Times/api-endpoint"
+	"time"
+
+	"github.com/Financial-Times/api-endpoint"
 	"github.com/Financial-Times/http-handlers-go/httphandlers"
 	"github.com/Financial-Times/internal-concordances/concepts"
 	"github.com/Financial-Times/internal-concordances/health"
 	"github.com/Financial-Times/internal-concordances/resources"
 	status "github.com/Financial-Times/service-status-go/httphandlers"
 	"github.com/husobee/vestigo"
-	cli "github.com/jawher/mow.cli"
-	metrics "github.com/rcrowley/go-metrics"
+	"github.com/jawher/mow.cli"
+	"github.com/rcrowley/go-metrics"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -37,7 +39,7 @@ func main() {
 
 	conceptSearchEndpoint := app.String(cli.StringOpt{
 		Name:   "concept-search-api-endpoint",
-		Value:  "http://concept-search-api/concepts",
+		Value:  "http://concept-search-api",
 		Desc:   "Endpoint to query for concepts",
 		EnvVar: "CONCEPT_SEARCH_ENDPOINT",
 	})
@@ -70,12 +72,12 @@ func main() {
 		log.Infof("[Startup] %v is starting", *appSystemCode)
 		log.Infof("System code: %s, App Name: %s, Port: %s", *appSystemCode, *appName, *port)
 
-		healthService := health.NewHealthService(*appSystemCode, *appName, appDescription)
-
-		client := &http.Client{}
+		client := &http.Client{Timeout: 8 * time.Second}
 
 		search := concepts.NewSearch(client, *conceptSearchEndpoint)
 		concordances := concepts.NewConcordances(client, *publicConcordancesEndpoint)
+
+		healthService := health.NewHealthService(*appSystemCode, *appName, appDescription, search.Check())
 
 		serveEndpoints(*port, apiYml, healthService, search, concordances)
 	}

@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
 	"github.com/husobee/vestigo"
 	"github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
@@ -22,7 +23,7 @@ func TestSearchByIDsNoResults(t *testing.T) {
 	server := serverMock.startServer(t)
 	defer server.Close()
 
-	search := NewSearch(&http.Client{}, server.URL+"/concepts")
+	search := NewSearch(&http.Client{}, server.URL)
 	concepts, err := search.ByIDs("tid_TestSearchByIDsNoResults", requestedUUIDs...)
 
 	assert.NoError(t, err)
@@ -42,7 +43,7 @@ func TestSearchByIDs(t *testing.T) {
 	server := serverMock.startServer(t)
 	defer server.Close()
 
-	search := NewSearch(&http.Client{}, server.URL+"/concepts")
+	search := NewSearch(&http.Client{}, server.URL)
 	concepts, err := search.ByIDs("tid_TestSearchByIDs", requestedUUIDs...)
 
 	assert.NoError(t, err)
@@ -51,14 +52,14 @@ func TestSearchByIDs(t *testing.T) {
 }
 
 func TestSearchNoIDsProvided(t *testing.T) {
-	search := NewSearch(&http.Client{}, "/concepts")
+	search := NewSearch(&http.Client{}, "")
 	_, err := search.ByIDs("tid_TestSearchNoIDsProvided")
 
 	assert.EqualError(t, err, ErrNoConceptsToSearch.Error())
 }
 
 func TestSearchAllIDsProvidedEmpty(t *testing.T) {
-	search := NewSearch(&http.Client{}, "/concepts")
+	search := NewSearch(&http.Client{}, "")
 	_, err := search.ByIDs("tid_TestSearchNoIDsProvided", "", "", "", "")
 
 	assert.EqualError(t, err, ErrConceptUUIDsAreEmpty.Error())
@@ -87,7 +88,7 @@ func TestSearchResponseFailed(t *testing.T) {
 	server := serverMock.startServer(t)
 	defer server.Close()
 
-	search := NewSearch(&http.Client{}, server.URL+"/concepts")
+	search := NewSearch(&http.Client{}, server.URL)
 	_, err := search.ByIDs("tid_TestSearchResponseFailed", requestedUUIDs...)
 
 	assert.EqualError(t, err, "403 Forbidden: forbidden!!!!!")
@@ -103,7 +104,7 @@ func TestSearchResponseInvalidJSON(t *testing.T) {
 	server := serverMock.startServer(t)
 	defer server.Close()
 
-	search := NewSearch(&http.Client{}, server.URL+"/concepts")
+	search := NewSearch(&http.Client{}, server.URL)
 	_, err := search.ByIDs("tid_TestSearchResponseInvalidJSON", requestedUUIDs...)
 
 	assert.Error(t, err)
@@ -143,5 +144,62 @@ func (m *mockConceptSearchAPI) startServer(t *testing.T) *httptest.Server {
 		w.Write([]byte(json))
 	})
 
+	return httptest.NewServer(r)
+}
+
+func TestHappyCheck(t *testing.T) {
+	gtgServerMock := newConceptSearchAPIGTGMock(t, http.StatusOK)
+	defer gtgServerMock.Close()
+
+	search := NewSearch(&http.Client{}, gtgServerMock.URL)
+	check := search.Check()
+	assertCheckConsistency(t, check)
+	msg, err := check.Checker()
+	assert.NoError(t, err)
+	assert.Equal(t, "Concept Search API is good to go", msg)
+}
+
+func TestUnhappyCheckDueInvalidURL(t *testing.T) {
+	search := NewSearch(&http.Client{}, ":#")
+	check := search.Check()
+	assertCheckConsistency(t, check)
+	_, err := check.Checker()
+	assert.EqualError(t, err, "parse :: missing protocol scheme")
+}
+
+func TestUnhappyCheckDueHTTPCallError(t *testing.T) {
+	search := NewSearch(&http.Client{}, "")
+	check := search.Check()
+	assertCheckConsistency(t, check)
+	_, err := check.Checker()
+	assert.EqualError(t, err, "Get /__gtg: unsupported protocol scheme \"\"")
+}
+
+func TestUnhappyCheckDueNon200HTTPStatus(t *testing.T) {
+	gtgServerMock := newConceptSearchAPIGTGMock(t, http.StatusServiceUnavailable)
+	defer gtgServerMock.Close()
+
+	search := NewSearch(&http.Client{}, gtgServerMock.URL)
+	check := search.Check()
+	assertCheckConsistency(t, check)
+	_, err := check.Checker()
+	assert.EqualError(t, err, "GTG returned a non-200 HTTP status: 503")
+}
+
+func assertCheckConsistency(t *testing.T, check fthealth.Check) {
+	assert.Equal(t, "concept-search-api", check.ID)
+	assert.Equal(t, "Concept information can not be returned to client", check.BusinessImpact)
+	assert.Equal(t, "Concept Search API Healthcheck", check.Name)
+	assert.Equal(t, "https://dewey.ft.com/internal-concordances.html", check.PanicGuide)
+	assert.Equal(t, uint8(1), check.Severity)
+	assert.Equal(t, "Concept Search API is not available", check.TechnicalSummary)
+}
+
+func newConceptSearchAPIGTGMock(t *testing.T, status int) *httptest.Server {
+	r := vestigo.NewRouter()
+	r.Get("/__gtg", func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, expectedUserAgent, r.Header.Get("User-Agent"))
+		w.WriteHeader(status)
+	})
 	return httptest.NewServer(r)
 }
