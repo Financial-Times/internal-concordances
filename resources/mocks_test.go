@@ -15,6 +15,11 @@ func (m *mockConcordances) GetConcordances(tid string, uuids ...string) (map[str
 	return args.Get(0).(map[string][]concepts.Identifier), args.Error(1)
 }
 
+func (m *mockConcordances) Check() fthealth.Check {
+	args := m.Called()
+	return args.Get(0).(fthealth.Check)
+}
+
 type mockSearch struct {
 	mock.Mock
 }
