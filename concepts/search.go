@@ -106,7 +106,7 @@ func validateUUIDs(uuids []string) error {
 func (c *conceptSearchAPI) Check() fthealth.Check {
 	return fthealth.Check{
 		ID:               "concept-search-api",
-		BusinessImpact:   "Concept information can not be returned to client",
+		BusinessImpact:   "Concept information can not be returned to clients",
 		Name:             "Concept Search API Healthcheck",
 		PanicGuide:       "https://dewey.ft.com/internal-concordances.html",
 		Severity:         1,

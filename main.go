@@ -3,7 +3,6 @@ package main
 import (
 	"net/http"
 	"os"
-
 	"time"
 
 	"github.com/Financial-Times/api-endpoint"
@@ -46,7 +45,7 @@ func main() {
 
 	publicConcordancesEndpoint := app.String(cli.StringOpt{
 		Name:   "public-concordances-endpoint",
-		Value:  "http://public-concordances-api/concordances",
+		Value:  "http://public-concordances-api",
 		Desc:   "Endpoint to concord ids with",
 		EnvVar: "PUBLIC_CONCORDANCES_ENDPOINT",
 	})
@@ -77,7 +76,7 @@ func main() {
 		search := concepts.NewSearch(client, *conceptSearchEndpoint)
 		concordances := concepts.NewConcordances(client, *publicConcordancesEndpoint)
 
-		healthService := health.NewHealthService(*appSystemCode, *appName, appDescription, search.Check())
+		healthService := health.NewHealthService(*appSystemCode, *appName, appDescription, search.Check(), concordances.Check())
 
 		serveEndpoints(*port, apiYml, healthService, search, concordances)
 	}

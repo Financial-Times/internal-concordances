@@ -147,48 +147,48 @@ func (m *mockConceptSearchAPI) startServer(t *testing.T) *httptest.Server {
 	return httptest.NewServer(r)
 }
 
-func TestHappyCheck(t *testing.T) {
+func TestSearchHappyCheck(t *testing.T) {
 	gtgServerMock := newConceptSearchAPIGTGMock(t, http.StatusOK)
 	defer gtgServerMock.Close()
 
 	search := NewSearch(&http.Client{}, gtgServerMock.URL)
 	check := search.Check()
-	assertCheckConsistency(t, check)
+	assertSearchCheckConsistency(t, check)
 	msg, err := check.Checker()
 	assert.NoError(t, err)
 	assert.Equal(t, "Concept Search API is good to go", msg)
 }
 
-func TestUnhappyCheckDueInvalidURL(t *testing.T) {
+func TestSearchUnhappyCheckDueInvalidURL(t *testing.T) {
 	search := NewSearch(&http.Client{}, ":#")
 	check := search.Check()
-	assertCheckConsistency(t, check)
+	assertSearchCheckConsistency(t, check)
 	_, err := check.Checker()
 	assert.EqualError(t, err, "parse :: missing protocol scheme")
 }
 
-func TestUnhappyCheckDueHTTPCallError(t *testing.T) {
+func TestSearchUnhappyCheckDueHTTPCallError(t *testing.T) {
 	search := NewSearch(&http.Client{}, "")
 	check := search.Check()
-	assertCheckConsistency(t, check)
+	assertSearchCheckConsistency(t, check)
 	_, err := check.Checker()
 	assert.EqualError(t, err, "Get /__gtg: unsupported protocol scheme \"\"")
 }
 
-func TestUnhappyCheckDueNon200HTTPStatus(t *testing.T) {
+func TestSearchUnhappyCheckDueNon200HTTPStatus(t *testing.T) {
 	gtgServerMock := newConceptSearchAPIGTGMock(t, http.StatusServiceUnavailable)
 	defer gtgServerMock.Close()
 
 	search := NewSearch(&http.Client{}, gtgServerMock.URL)
 	check := search.Check()
-	assertCheckConsistency(t, check)
+	assertSearchCheckConsistency(t, check)
 	_, err := check.Checker()
 	assert.EqualError(t, err, "GTG returned a non-200 HTTP status: 503")
 }
 
-func assertCheckConsistency(t *testing.T, check fthealth.Check) {
+func assertSearchCheckConsistency(t *testing.T, check fthealth.Check) {
 	assert.Equal(t, "concept-search-api", check.ID)
-	assert.Equal(t, "Concept information can not be returned to client", check.BusinessImpact)
+	assert.Equal(t, "Concept information can not be returned to clients", check.BusinessImpact)
 	assert.Equal(t, "Concept Search API Healthcheck", check.Name)
 	assert.Equal(t, "https://dewey.ft.com/internal-concordances.html", check.PanicGuide)
 	assert.Equal(t, uint8(1), check.Severity)

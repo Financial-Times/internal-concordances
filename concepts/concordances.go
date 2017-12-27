@@ -2,13 +2,17 @@ package concepts
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+
+	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
 )
 
 const concordancesQueryParam = "conceptId"
 
 type Concordances interface {
 	GetConcordances(tid string, uuids ...string) (map[string][]Identifier, error)
+	Check() fthealth.Check
 }
 
 type publicConcordancesAPI struct {
@@ -29,7 +33,7 @@ func (c *publicConcordancesAPI) GetConcordances(tid string, uuids ...string) (ma
 		return nil, err
 	}
 
-	req, err := http.NewRequest("GET", c.uri, nil)
+	req, err := http.NewRequest("GET", c.uri+"/concordances", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -73,4 +77,37 @@ func concordancesToIdentifiers(concordances []Concordance) map[string][]Identifi
 		}
 	}
 	return identifiers
+}
+
+func (c *publicConcordancesAPI) Check() fthealth.Check {
+	return fthealth.Check{
+		ID:               "public-concordance-api",
+		BusinessImpact:   "Concorded concepts can not be returned to clients",
+		Name:             "Public Concordance API Healthcheck",
+		PanicGuide:       "https://dewey.ft.com/internal-concordances.html",
+		Severity:         1,
+		TechnicalSummary: "Public Concordance API is not available",
+		Checker:          c.gtg,
+	}
+}
+
+func (c *publicConcordancesAPI) gtg() (string, error) {
+	req, err := http.NewRequest("GET", c.uri+"/__gtg", nil)
+	if err != nil {
+		return "", err
+	}
+
+	req.Header.Add("User-Agent", "UPP internal-concordances")
+
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return "", err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("GTG returned a non-200 HTTP status: %v", resp.StatusCode)
+	}
+	return "Public Concordance API is good to go", nil
 }
