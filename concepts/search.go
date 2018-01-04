@@ -3,7 +3,10 @@ package concepts
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
+
+	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
 )
 
 const conceptSearchQueryParam = "ids"
@@ -17,6 +20,7 @@ var (
 
 type Search interface {
 	ByIDs(tid string, uuids ...string) (map[string]Concept, error)
+	Check() fthealth.Check
 }
 
 type conceptSearchAPI struct {
@@ -37,7 +41,7 @@ func (c *conceptSearchAPI) ByIDs(tid string, uuids ...string) (map[string]Concep
 		return nil, err
 	}
 
-	req, err := http.NewRequest("GET", c.uri, nil)
+	req, err := http.NewRequest("GET", c.uri+"/concepts", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -97,4 +101,37 @@ func validateUUIDs(uuids []string) error {
 	}
 
 	return ErrConceptUUIDsAreEmpty
+}
+
+func (c *conceptSearchAPI) Check() fthealth.Check {
+	return fthealth.Check{
+		ID:               "concept-search-api",
+		BusinessImpact:   "Concept information can not be returned to clients",
+		Name:             "Concept Search API Healthcheck",
+		PanicGuide:       "https://dewey.ft.com/internal-concordances.html",
+		Severity:         1,
+		TechnicalSummary: "Concept Search API is not available",
+		Checker:          c.gtg,
+	}
+}
+
+func (c *conceptSearchAPI) gtg() (string, error) {
+	req, err := http.NewRequest("GET", c.uri+"/__gtg", nil)
+	if err != nil {
+		return "", err
+	}
+
+	req.Header.Add("User-Agent", "UPP internal-concordances")
+
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return "", err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("GTG returned a non-200 HTTP status: %v", resp.StatusCode)
+	}
+	return "Concept Search API is good to go", nil
 }

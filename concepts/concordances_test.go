@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
 	"github.com/husobee/vestigo"
 	"github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
@@ -24,7 +25,7 @@ func TestGetConcordancesEmptyResponse(t *testing.T) {
 	server := serverMock.startServer(t)
 	defer server.Close()
 
-	concordances := NewConcordances(&http.Client{}, server.URL+"/concordances")
+	concordances := NewConcordances(&http.Client{}, server.URL)
 	identifiers, err := concordances.GetConcordances("tid_TestGetConcordancesEmptyResponse", requestedUUIDs...)
 
 	assert.NoError(t, err)
@@ -41,7 +42,7 @@ func TestGetConcordancesAtLeastOneNonEmptyID(t *testing.T) {
 	server := serverMock.startServer(t)
 	defer server.Close()
 
-	concordances := NewConcordances(&http.Client{}, server.URL+"/concordances")
+	concordances := NewConcordances(&http.Client{}, server.URL)
 	identifiers, err := concordances.GetConcordances("tid_TestGetConcordancesAtLeastOneNonEmptyID", requestedUUIDs...)
 
 	assert.NoError(t, err)
@@ -61,7 +62,7 @@ func TestGetConcordances(t *testing.T) {
 	server := serverMock.startServer(t)
 	defer server.Close()
 
-	concordances := NewConcordances(&http.Client{}, server.URL+"/concordances")
+	concordances := NewConcordances(&http.Client{}, server.URL)
 	identifiers, err := concordances.GetConcordances("tid_TestGetEmptyConcordances", requestedUUIDs...)
 
 	assert.NoError(t, err)
@@ -74,14 +75,14 @@ func TestGetConcordances(t *testing.T) {
 }
 
 func TestGetConcordancesFailsWhenNoIDsSupplied(t *testing.T) {
-	concordances := NewConcordances(&http.Client{}, "/concordances")
+	concordances := NewConcordances(&http.Client{}, "")
 	_, err := concordances.GetConcordances("tid_TestGetConcordancesFailsWhenNoIDsSupplied")
 
 	assert.EqualError(t, err, ErrNoConceptsToSearch.Error())
 }
 
 func TestGetConcordancesFailsWhenEmptyIDsSupplied(t *testing.T) {
-	concordances := NewConcordances(&http.Client{}, "/concordances")
+	concordances := NewConcordances(&http.Client{}, "")
 	_, err := concordances.GetConcordances("tid_TestGetConcordancesFailsWhenEmptyIDsSupplied", "", "")
 
 	assert.EqualError(t, err, ErrConceptUUIDsAreEmpty.Error())
@@ -110,7 +111,7 @@ func TestGetConcordancesResponseJSONInvalid(t *testing.T) {
 	server := serverMock.startServer(t)
 	defer server.Close()
 
-	concordances := NewConcordances(&http.Client{}, server.URL+"/concordances")
+	concordances := NewConcordances(&http.Client{}, server.URL)
 	_, err := concordances.GetConcordances("tid_TestGetConcordancesResponseJSONInvalid", requestedUUIDs...)
 
 	assert.Error(t, err)
@@ -126,7 +127,7 @@ func TestGetConcordancesFailedResponse(t *testing.T) {
 	server := serverMock.startServer(t)
 	defer server.Close()
 
-	concordances := NewConcordances(&http.Client{}, server.URL+"/concordances")
+	concordances := NewConcordances(&http.Client{}, server.URL)
 	_, err := concordances.GetConcordances("tid_TestGetConcordancesFailedResponse", requestedUUIDs...)
 
 	assert.EqualError(t, err, "503 Service Unavailable: uh oh")
@@ -142,7 +143,7 @@ func TestGetConcordancesFailedResponseMessageDecodingAlsoFailed(t *testing.T) {
 	server := serverMock.startServer(t)
 	defer server.Close()
 
-	concordances := NewConcordances(&http.Client{}, server.URL+"/concordances")
+	concordances := NewConcordances(&http.Client{}, server.URL)
 	_, err := concordances.GetConcordances("tid_TestGetConcordancesFailedResponse", requestedUUIDs...)
 
 	assert.EqualError(t, err, "400 Bad Request: Failed to decode message from response")
@@ -182,5 +183,62 @@ func (m *mockPublicConcordancesServer) startServer(t *testing.T) *httptest.Serve
 		w.Write([]byte(json))
 	})
 
+	return httptest.NewServer(r)
+}
+
+func TestConcordanceHappyCheck(t *testing.T) {
+	gtgServerMock := newPublicConcordanceAPIGTGMock(t, http.StatusOK)
+	defer gtgServerMock.Close()
+
+	search := NewConcordances(&http.Client{}, gtgServerMock.URL)
+	check := search.Check()
+	assertConcordanceCheckConsistency(t, check)
+	msg, err := check.Checker()
+	assert.NoError(t, err)
+	assert.Equal(t, "Public Concordance API is good to go", msg)
+}
+
+func TestConcordanceUnhappyCheckDueInvalidURL(t *testing.T) {
+	search := NewConcordances(&http.Client{}, ":#")
+	check := search.Check()
+	assertConcordanceCheckConsistency(t, check)
+	_, err := check.Checker()
+	assert.EqualError(t, err, "parse :: missing protocol scheme")
+}
+
+func TestConcordanceUnhappyCheckDueHTTPCallError(t *testing.T) {
+	search := NewConcordances(&http.Client{}, "")
+	check := search.Check()
+	assertConcordanceCheckConsistency(t, check)
+	_, err := check.Checker()
+	assert.EqualError(t, err, "Get /__gtg: unsupported protocol scheme \"\"")
+}
+
+func TestConcordanceUnhappyCheckDueNon200HTTPStatus(t *testing.T) {
+	gtgServerMock := newConceptSearchAPIGTGMock(t, http.StatusServiceUnavailable)
+	defer gtgServerMock.Close()
+
+	search := NewConcordances(&http.Client{}, gtgServerMock.URL)
+	check := search.Check()
+	assertConcordanceCheckConsistency(t, check)
+	_, err := check.Checker()
+	assert.EqualError(t, err, "GTG returned a non-200 HTTP status: 503")
+}
+
+func assertConcordanceCheckConsistency(t *testing.T, check fthealth.Check) {
+	assert.Equal(t, "public-concordance-api", check.ID)
+	assert.Equal(t, "Concorded concepts can not be returned to clients", check.BusinessImpact)
+	assert.Equal(t, "Public Concordance API Healthcheck", check.Name)
+	assert.Equal(t, "https://dewey.ft.com/internal-concordances.html", check.PanicGuide)
+	assert.Equal(t, uint8(1), check.Severity)
+	assert.Equal(t, "Public Concordance API is not available", check.TechnicalSummary)
+}
+
+func newPublicConcordanceAPIGTGMock(t *testing.T, status int) *httptest.Server {
+	r := vestigo.NewRouter()
+	r.Get("/__gtg", func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, expectedUserAgent, r.Header.Get("User-Agent"))
+		w.WriteHeader(status)
+	})
 	return httptest.NewServer(r)
 }

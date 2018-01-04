@@ -84,7 +84,7 @@ workflows:
   test-and-build-docker:
     jobs:
       - build
-      - dredd
+      #- dredd
       - dockerfile:
           requires:
             - build
