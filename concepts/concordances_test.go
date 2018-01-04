@@ -89,14 +89,14 @@ func TestGetConcordancesFailsWhenEmptyIDsSupplied(t *testing.T) {
 }
 
 func TestGetConcordancesFailsInvalidURL(t *testing.T) {
-	concordances := NewConcordances(&http.Client{}, ":#")
+	concordances := NewConcordances(&http.Client{}, ":#") // this triggers a invalid url during the http.NewRequest() line
 	_, err := concordances.GetConcordances("tid_TestGetConcordancesFailsInvalidURL", uuid.NewV4().String())
 
 	assert.Error(t, err)
 }
 
 func TestGetConcordancesRequestFails(t *testing.T) {
-	concordances := NewConcordances(&http.Client{}, "#:")
+	concordances := NewConcordances(&http.Client{}, "#:") // this triggers a protocol error in the client.Do()
 	_, err := concordances.GetConcordances("tid_TestGetConcordancesRequestFails", uuid.NewV4().String())
 
 	assert.Error(t, err)
