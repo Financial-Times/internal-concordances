@@ -37,7 +37,7 @@ func TestGetConcordancesAtLeastOneNonEmptyID(t *testing.T) {
 	serverMock := new(mockPublicConcordancesServer)
 	requestedUUIDs := []string{"", "", uuid.NewV4().String()}
 	serverMock.On("getRequest").Return("tid_TestGetConcordancesAtLeastOneNonEmptyID", requestedUUIDs)
-	serverMock.On("getResponse").Return(`{}`, http.StatusOK)
+	serverMock.On("getResponse").Return(`{}`, http.StatusOK) // respond with an empty body, so no data will be returned, but if the test passes then the test case is successful.
 
 	server := serverMock.startServer(t)
 	defer server.Close()
