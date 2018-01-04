@@ -28,6 +28,8 @@ func TestHealthServiceHandler(t *testing.T) {
 	err := dec.Decode(&r)
 	assert.NoError(t, err)
 	assert.Len(t, r.Checks, 2)
+
+	assert.False(t, r.Ok)
 }
 
 func TestGTGAllGood(t *testing.T) {
