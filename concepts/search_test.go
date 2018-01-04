@@ -27,7 +27,7 @@ func TestSearchByIDsNoResults(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Len(t, concepts, 0)
-	serverMock.AssertExpectations(t) // failure here means the concordances API has not been called
+	serverMock.AssertExpectations(t) // failure here means the search API has not been called
 }
 
 func TestSearchByIDs(t *testing.T) {
@@ -47,7 +47,7 @@ func TestSearchByIDs(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Len(t, concepts, 1)
-	serverMock.AssertExpectations(t) // failure here means the concordances API has not been called
+	serverMock.AssertExpectations(t) // failure here means the search API has not been called
 }
 
 func TestSearchNoIDsProvided(t *testing.T) {
@@ -91,7 +91,7 @@ func TestSearchResponseFailed(t *testing.T) {
 	_, err := search.ByIDs("tid_TestSearchResponseFailed", requestedUUIDs...)
 
 	assert.EqualError(t, err, "403 Forbidden: forbidden!!!!!")
-	serverMock.AssertExpectations(t) // failure here means the concordances API has not been called
+	serverMock.AssertExpectations(t) // failure here means the search API has not been called
 }
 
 func TestSearchResponseInvalidJSON(t *testing.T) {
@@ -107,7 +107,7 @@ func TestSearchResponseInvalidJSON(t *testing.T) {
 	_, err := search.ByIDs("tid_TestSearchResponseInvalidJSON", requestedUUIDs...)
 
 	assert.Error(t, err)
-	serverMock.AssertExpectations(t) // failure here means the concordances API has not been called
+	serverMock.AssertExpectations(t) // failure here means the search API has not been called
 }
 
 type mockConceptSearchAPI struct {

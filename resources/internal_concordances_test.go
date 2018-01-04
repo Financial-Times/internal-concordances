@@ -123,6 +123,7 @@ func TestSearchByIDs(t *testing.T) {
 	identifiers := map[string][]concepts.Identifier{
 		"a-uuid": []concepts.Identifier{
 			{Authority: "authority", IdentifierValue: "a-concorded-uuid"},
+			{Authority: "authority", IdentifierValue: "a-uuid"},
 		},
 	}
 
@@ -139,6 +140,7 @@ func TestSearchByIDs(t *testing.T) {
 			PrefLabel: "Donald Trump",
 			Concordances: []concepts.Identifier{
 				{Authority: "authority", IdentifierValue: "a-concorded-uuid"},
+				{Authority: "authority", IdentifierValue: "a-uuid"},
 			},
 		},
 	}}
