@@ -3,14 +3,17 @@ package main
 import (
 	"net/http"
 	"os"
+	"time"
 
-	api "github.com/Financial-Times/api-endpoint"
+	"github.com/Financial-Times/api-endpoint"
 	"github.com/Financial-Times/http-handlers-go/httphandlers"
+	"github.com/Financial-Times/internal-concordances/concepts"
 	"github.com/Financial-Times/internal-concordances/health"
+	"github.com/Financial-Times/internal-concordances/resources"
 	status "github.com/Financial-Times/service-status-go/httphandlers"
 	"github.com/husobee/vestigo"
-	cli "github.com/jawher/mow.cli"
-	metrics "github.com/rcrowley/go-metrics"
+	"github.com/jawher/mow.cli"
+	"github.com/rcrowley/go-metrics"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -31,6 +34,20 @@ func main() {
 		Value:  "internal-concordances",
 		Desc:   "Application name",
 		EnvVar: "APP_NAME",
+	})
+
+	conceptSearchEndpoint := app.String(cli.StringOpt{
+		Name:   "concept-search-api-endpoint",
+		Value:  "http://concept-search-api",
+		Desc:   "Endpoint to query for concepts",
+		EnvVar: "CONCEPT_SEARCH_ENDPOINT",
+	})
+
+	publicConcordancesEndpoint := app.String(cli.StringOpt{
+		Name:   "public-concordances-endpoint",
+		Value:  "http://public-concordances-api",
+		Desc:   "Endpoint to concord ids with",
+		EnvVar: "PUBLIC_CONCORDANCES_ENDPOINT",
 	})
 
 	port := app.String(cli.StringOpt{
@@ -54,9 +71,14 @@ func main() {
 		log.Infof("[Startup] %v is starting", *appSystemCode)
 		log.Infof("System code: %s, App Name: %s, Port: %s", *appSystemCode, *appName, *port)
 
-		healthService := health.NewHealthService(*appSystemCode, *appName, appDescription)
+		client := &http.Client{Timeout: 8 * time.Second}
 
-		serveEndpoints(*port, apiYml, healthService)
+		search := concepts.NewSearch(client, *conceptSearchEndpoint)
+		concordances := concepts.NewConcordances(client, *publicConcordancesEndpoint)
+
+		healthService := health.NewHealthService(*appSystemCode, *appName, appDescription, search.Check(), concordances.Check())
+
+		serveEndpoints(*port, apiYml, healthService, search, concordances)
 	}
 
 	err := app.Run(os.Args)
@@ -66,7 +88,7 @@ func main() {
 	}
 }
 
-func serveEndpoints(port string, apiYml *string, healthService *health.HealthService) {
+func serveEndpoints(port string, apiYml *string, healthService *health.HealthService, search concepts.Search, concordances concepts.Concordances) {
 	r := vestigo.NewRouter()
 
 	var monitoringRouter http.Handler = r
@@ -76,6 +98,8 @@ func serveEndpoints(port string, apiYml *string, healthService *health.HealthSer
 	r.Get("/__health", healthService.HealthCheckHandleFunc())
 	r.Get(status.GTGPath, status.NewGoodToGoHandler(healthService.GTG))
 	r.Get(status.BuildInfoPath, status.BuildInfoHandler)
+
+	r.Get("/internalconcordances", resources.InternalConcordances(concordances, search))
 
 	http.Handle("/", monitoringRouter)
 

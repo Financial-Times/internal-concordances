@@ -14,15 +14,12 @@ type HealthService struct {
 }
 
 // NewHealthService returns a new HealthService
-func NewHealthService(appSystemCode string, appName string, appDescription string) *HealthService {
+func NewHealthService(appSystemCode string, appName string, appDescription string, checks ...fthealth.Check) *HealthService {
 	service := &HealthService{}
 	service.SystemCode = appSystemCode
 	service.Name = appName
 	service.Description = appDescription
-	service.Checks = []fthealth.Check{
-		service.skeletonCheck(),
-	}
-
+	service.Checks = checks
 	return service
 }
 
@@ -31,23 +28,12 @@ func (service *HealthService) HealthCheckHandleFunc() func(w http.ResponseWriter
 	return fthealth.Handler(service)
 }
 
-func (service *HealthService) skeletonCheck() fthealth.Check {
-	return fthealth.Check{
-		ID:               "skeleton-healthcheck",
-		BusinessImpact:   "None",
-		Name:             "Skeleton Healthcheck",
-		PanicGuide:       "https://dewey.ft.com/internal-concordances.html",
-		Severity:         1,
-		TechnicalSummary: "The app is not running",
-		Checker:          service.skeletonPingCheck,
-	}
-}
-
-func (service *HealthService) skeletonPingCheck() (string, error) {
-	return "UPP internal-concordances is healthy", nil
-}
-
 // GTG returns the current gtg status
 func (service *HealthService) GTG() gtg.Status {
+	for _, check := range service.Checks {
+		if _, err := check.Checker(); err != nil {
+			return gtg.Status{GoodToGo: false, Message: err.Error()}
+		}
+	}
 	return gtg.Status{GoodToGo: true, Message: "OK"}
 }

@@ -17,6 +17,78 @@ schemes:
   - https
 
 paths:
+  /internalconcordances:
+    get:
+      summary: Internal Concordances
+      description: Concords given uuids and enriches them with data from Concept Search API
+      produces:
+        - application/json
+      tags:
+        - Internal API
+      parameters:
+        - name: ids
+          in: query
+          description: >
+            IDs to concord and enrich - you may also supply multiple ids in one call.
+          required: true
+          type: array
+          items:
+            type: string
+            minimum: 1
+          collectionFormat: multi
+          x-example:
+            - 1f2c7277-5f74-3397-b852-92bcb1096021
+            - 5d0fedcd-20e5-48d7-953e-b8e72865828c
+      responses:
+        200:
+          description: >
+            Given at least one non-empty 'ids' parameter, you will receive a successful response, including zero or more concorded concepts, mapped to the originally requested uuids.
+          schema:
+            type: object
+            properties:
+              concepts:
+                type: object
+                description: A map of all the requested UUIDs mapped to their canonical concepts
+                additionalProperties:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: The canonical concept id
+                      x-example: "http://www.ft.com/thing/1f2c7277-5f74-3397-b852-92bcb1096021"
+                    apiUrl:
+                      type: string
+                      description: The canonical api url
+                      x-example: "http://api.ft.com/people/1f2c7277-5f74-3397-b852-92bcb1096021"
+                    type:
+                      type: string
+                      description: The type of concept (i.e. Brand, Genre, Organisation etc.)
+                      x-example: http:///www.ft.com/person/Person
+                    prefLabel:
+                      type: string
+                      description: The preferred label for the concept
+                      x-example: Lawrence Summers
+                    concordances:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          identifierValue:
+                            type: string
+                            description: The ID for this concept from the corresponding Authority
+                            x-example: 1f2c7277-5f74-3397-b852-92bcb1096021
+                          authority:
+                            type: string
+                            description: The authority which provided this concept identifierValue
+                            x-example: http://api.ft.com/system/UPP
+                    isFTAuthor:
+                      type: boolean
+                      description: True if this concept is a person and an author at the FT
+                      x-example: false
+        400:
+          description: You must supply at least one non-empty 'ids' parameter
+        503:
+          description: Either the UPP public-concordances-api or concept-search-api services are not working as expected.
   /__health:
     get:
       summary: Healthchecks
