@@ -38,14 +38,14 @@ func main() {
 
 	conceptSearchEndpoint := app.String(cli.StringOpt{
 		Name:   "concept-search-api-endpoint",
-		Value:  "http://concept-search-api",
+		Value:  "http://concept-search-api:8080",
 		Desc:   "Endpoint to query for concepts",
 		EnvVar: "CONCEPT_SEARCH_ENDPOINT",
 	})
 
 	publicConcordancesEndpoint := app.String(cli.StringOpt{
 		Name:   "public-concordances-endpoint",
-		Value:  "http://public-concordances-api",
+		Value:  "http://public-concordances-api:8080",
 		Desc:   "Endpoint to concord ids with",
 		EnvVar: "PUBLIC_CONCORDANCES_ENDPOINT",
 	})
