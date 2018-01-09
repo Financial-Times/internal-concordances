@@ -2,6 +2,7 @@ package health
 
 import (
 	"net/http"
+	"time"
 
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
 	"github.com/Financial-Times/service-status-go/gtg"
@@ -9,7 +10,7 @@ import (
 
 // HealthService runs application health checks, and provides the /__health http endpoint
 type HealthService struct {
-	fthealth.HealthCheck
+	fthealth.TimedHealthCheck
 	gtgChecks []fthealth.Check
 }
 
@@ -20,6 +21,7 @@ func NewHealthService(appSystemCode string, appName string, appDescription strin
 	service.Name = appName
 	service.Description = appDescription
 	service.Checks = checks
+	service.Timeout = 10 * time.Second
 	return service
 }
 
