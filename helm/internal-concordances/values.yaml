@@ -6,3 +6,6 @@ replicaCount: 2
 image:
   repository: coco/internal-concordances
   pullPolicy: Always
+resources:
+  limits:
+    memory: 32Mi
