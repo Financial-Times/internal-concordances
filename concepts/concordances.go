@@ -8,10 +8,15 @@ import (
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
 )
 
-const concordancesQueryParam = "conceptId"
+const (
+	concordancesQueryParam    = "conceptId"
+	authorityQueryParam       = "authority"
+	identifierValueQueryParam = "identifierValue"
+	NoAuthority               = ""
+)
 
 type Concordances interface {
-	GetConcordances(tid string, uuids ...string) (map[string][]Identifier, error)
+	GetConcordances(tid, authority string, ids ...string) (map[string][]Identifier, error)
 	Check() fthealth.Check
 }
 
@@ -28,8 +33,8 @@ func NewConcordances(client *http.Client, uri string) Concordances {
 	return &publicConcordancesAPI{client: client, uri: uri}
 }
 
-func (c *publicConcordancesAPI) GetConcordances(tid string, uuids ...string) (map[string][]Identifier, error) {
-	if err := validateUUIDs(uuids); err != nil {
+func (c *publicConcordancesAPI) GetConcordances(tid, authority string, ids ...string) (map[string][]Identifier, error) {
+	if err := validateIDs(ids); err != nil {
 		return nil, err
 	}
 
@@ -39,8 +44,16 @@ func (c *publicConcordancesAPI) GetConcordances(tid string, uuids ...string) (ma
 	}
 
 	queryParams := req.URL.Query()
-	for _, uuid := range uuids {
-		queryParams.Add(concordancesQueryParam, uuid)
+	reqParamName := concordancesQueryParam
+
+	if authority != NoAuthority {
+		queryParams.Add(authorityQueryParam, authority)
+		reqParamName = identifierValueQueryParam
+	}
+
+	for _, id := range ids {
+		queryParams.Add(reqParamName, id)
+
 	}
 
 	req.URL.RawQuery = queryParams.Encode()

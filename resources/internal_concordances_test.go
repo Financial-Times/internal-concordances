@@ -32,8 +32,8 @@ func TestGetConcordancesFailsDueToEmptyUUIDS(t *testing.T) {
 	req.Header.Add("X-Request-Id", "tid_TestGetConcordancesFailsDueToEmptyUUIDS")
 	w := httptest.NewRecorder()
 
-	concordances.On("GetConcordances", "tid_TestGetConcordancesFailsDueToEmptyUUIDS", []string{""}).
-		Return(make(map[string][]concepts.Identifier), concepts.ErrConceptUUIDsAreEmpty)
+	concordances.On("GetConcordances", "tid_TestGetConcordancesFailsDueToEmptyUUIDS", "", []string{""}).
+		Return(make(map[string][]concepts.Identifier), concepts.ErrConceptIDsAreEmpty)
 
 	InternalConcordances(concordances, search)(w, req)
 
@@ -52,7 +52,7 @@ func TestGetConcordancesFails(t *testing.T) {
 	req.Header.Add("X-Request-Id", "tid_TestGetConcordancesFails")
 	w := httptest.NewRecorder()
 
-	concordances.On("GetConcordances", "tid_TestGetConcordancesFails", []string{"a-uuid"}).
+	concordances.On("GetConcordances", "tid_TestGetConcordancesFails", "", []string{"a-uuid"}).
 		Return(make(map[string][]concepts.Identifier), errComputerSaysNo)
 
 	InternalConcordances(concordances, search)(w, req)
@@ -72,7 +72,7 @@ func TestGetConcordancesReturnsNoData(t *testing.T) {
 	req.Header.Add("X-Request-Id", "tid_TestGetConcordancesReturnsNoData")
 	w := httptest.NewRecorder()
 
-	concordances.On("GetConcordances", "tid_TestGetConcordancesReturnsNoData", []string{"a-uuid"}).
+	concordances.On("GetConcordances", "tid_TestGetConcordancesReturnsNoData", "", []string{"a-uuid"}).
 		Return(make(map[string][]concepts.Identifier), nil)
 
 	InternalConcordances(concordances, search)(w, req)
@@ -83,6 +83,47 @@ func TestGetConcordancesReturnsNoData(t *testing.T) {
 	concordances.AssertExpectations(t)
 	search.AssertExpectations(t)
 }
+
+func TestInternalConcordancesEmptyAuthorityParamSupplied(t *testing.T) {
+	req := httptest.NewRequest("GET", "/?ids=a-uuid&authority=", nil)
+	w := httptest.NewRecorder()
+
+	InternalConcordances(nil, nil)(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, `{"message":"Please provide a non-empty 'authority' query parameter"}`, strings.TrimSpace(w.Body.String()))
+}
+
+func TestInternalConcordancesMultipleAuthorityParamsSupplied(t *testing.T) {
+	req := httptest.NewRequest("GET", "/?ids=a-uuid&authority=au1&authority=au2", nil)
+	w := httptest.NewRecorder()
+
+	InternalConcordances(nil, nil)(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, `{"message":"Please provide one value for 'authority' query parameter"}`, strings.TrimSpace(w.Body.String()))
+}
+
+func TestGetConcordancesReturnsNoDataWithAuthorityRequestParameter(t *testing.T) {
+	concordances := new(mockConcordances)
+	search := new(mockSearch)
+
+	req := httptest.NewRequest("GET", "/?ids=a-uuid&authority=a-valid-authority", nil)
+	req.Header.Add("X-Request-Id", "tid_TestGetConcordancesReturnsNoDataWithAuthorityRequestParameter")
+	w := httptest.NewRecorder()
+
+	concordances.On("GetConcordances", "tid_TestGetConcordancesReturnsNoDataWithAuthorityRequestParameter", "a-valid-authority", []string{"a-uuid"}).
+		Return(make(map[string][]concepts.Identifier), nil)
+
+	InternalConcordances(concordances, search)(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, `{"concepts":{}}`, strings.TrimSpace(w.Body.String()))
+
+	concordances.AssertExpectations(t)
+	search.AssertExpectations(t)
+}
+
 
 func TestSearchByIDsFails(t *testing.T) {
 	concordances := new(mockConcordances)
@@ -98,7 +139,7 @@ func TestSearchByIDsFails(t *testing.T) {
 		},
 	}
 
-	concordances.On("GetConcordances", "tid_TestSearchByIDsFails", []string{"a-uuid"}).
+	concordances.On("GetConcordances", "tid_TestSearchByIDsFails", "", []string{"a-uuid"}).
 		Return(identifiers, nil)
 
 	search.On("ByIDs", "tid_TestSearchByIDsFails", []string{"a-uuid"}).Return(make(map[string]concepts.Concept), errComputerSaysNo)
@@ -127,7 +168,7 @@ func TestSearchByIDs(t *testing.T) {
 		},
 	}
 
-	concordances.On("GetConcordances", "tid_TestSearchByIDs", []string{"a-concorded-uuid"}).
+	concordances.On("GetConcordances", "tid_TestSearchByIDs", "", []string{"a-concorded-uuid"}).
 		Return(identifiers, nil)
 
 	expectedConcepts := map[string]concepts.Concept{
@@ -173,7 +214,7 @@ func TestSearchByIDsOneConceptNotFound(t *testing.T) {
 		},
 	}
 
-	concordances.On("GetConcordances", "tid_TestSearchByIDsOneConceptNotFound", []string{"found-this-one", "but-not-this-one"}).
+	concordances.On("GetConcordances", "tid_TestSearchByIDsOneConceptNotFound", "", []string{"found-this-one", "but-not-this-one"}).
 		Return(identifiers, nil)
 
 	expectedConcepts := map[string]concepts.Concept{

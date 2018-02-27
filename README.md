@@ -34,11 +34,13 @@ Usage: internal-concordances [OPTIONS]
 
 UPP Internal Concordances
 
-Options:                  
-      --app-system-code   System Code of the application (env $APP_SYSTEM_CODE) (default "internal-concordances")
-      --app-name          Application name (env $APP_NAME) (default "internal-concordances")
-      --port              Port to listen on (env $APP_PORT) (default "8080")
-      --api-yml           Location of the API Swagger YML file. (env $API_YML) (default "./api.yml")
+Options:
+      --app-system-code                System Code of the application (env $APP_SYSTEM_CODE) (default "internal-concordances")
+      --app-name                       Application name (env $APP_NAME) (default "internal-concordances")
+      --concept-search-api-endpoint    Endpoint to query for concepts (env $CONCEPT_SEARCH_ENDPOINT) (default "http://localhost:8111")
+      --public-concordances-endpoint   Endpoint to concord ids with (env $PUBLIC_CONCORDANCES_ENDPOINT) (default "http://localhost:8222")
+      --port                           Port to listen on (env $APP_PORT) (default "8080")
+      --api-yml                        Location of the API Swagger YML file. (env $API_YML) (default "./api.yml")
 ```
 
 3. Test:

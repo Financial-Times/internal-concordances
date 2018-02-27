@@ -10,8 +10,8 @@ type mockConcordances struct {
 	mock.Mock
 }
 
-func (m *mockConcordances) GetConcordances(tid string, uuids ...string) (map[string][]concepts.Identifier, error) {
-	args := m.Called(tid, uuids)
+func (m *mockConcordances) GetConcordances(tid, authority string, uuids ...string) (map[string][]concepts.Identifier, error) {
+	args := m.Called(tid, authority, uuids)
 	return args.Get(0).(map[string][]concepts.Identifier), args.Error(1)
 }
 

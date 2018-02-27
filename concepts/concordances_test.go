@@ -26,7 +26,7 @@ func TestGetConcordancesEmptyResponse(t *testing.T) {
 	defer server.Close()
 
 	concordances := NewConcordances(&http.Client{}, server.URL)
-	identifiers, err := concordances.GetConcordances("tid_TestGetConcordancesEmptyResponse", requestedUUIDs...)
+	identifiers, err := concordances.GetConcordances("tid_TestGetConcordancesEmptyResponse", NoAuthority, requestedUUIDs...)
 
 	assert.NoError(t, err)
 	assert.Len(t, identifiers, 0)
@@ -43,7 +43,7 @@ func TestGetConcordancesAtLeastOneNonEmptyID(t *testing.T) {
 	defer server.Close()
 
 	concordances := NewConcordances(&http.Client{}, server.URL)
-	identifiers, err := concordances.GetConcordances("tid_TestGetConcordancesAtLeastOneNonEmptyID", requestedUUIDs...)
+	identifiers, err := concordances.GetConcordances("tid_TestGetConcordancesAtLeastOneNonEmptyID", NoAuthority, requestedUUIDs...)
 
 	assert.NoError(t, err)
 	assert.Len(t, identifiers, 0)
@@ -63,7 +63,7 @@ func TestGetConcordances(t *testing.T) {
 	defer server.Close()
 
 	concordances := NewConcordances(&http.Client{}, server.URL)
-	identifiers, err := concordances.GetConcordances("tid_TestGetEmptyConcordances", requestedUUIDs...)
+	identifiers, err := concordances.GetConcordances("tid_TestGetEmptyConcordances", NoAuthority, requestedUUIDs...)
 
 	assert.NoError(t, err)
 	assert.Len(t, identifiers, 1)
@@ -74,30 +74,57 @@ func TestGetConcordances(t *testing.T) {
 	serverMock.AssertExpectations(t) // failure here means the concordances API has not been called
 }
 
+func TestGetConcordancesByAuthority(t *testing.T) {
+	serverMock := new(mockPublicConcordancesServer)
+	requestedUUIDs := []string{uuid.NewV4().String()}
+	serverMock.On("getRequest").Return("tid_TestGetConcordancesByAuthority", requestedUUIDs)
+
+	concordancesResp, err := ioutil.ReadFile("./_fixtures/concordances_by_authority_response.json")
+	require.NoError(t, err)
+	serverMock.On("getResponse").Return(string(concordancesResp), http.StatusOK)
+
+	server := serverMock.startServer(t)
+	defer server.Close()
+
+	concordances := NewConcordances(&http.Client{}, server.URL)
+	uppAuthority := "http://api.ft.com/system/UPP"
+	identifiers, err := concordances.GetConcordances("tid_TestGetConcordancesByAuthority", uppAuthority, requestedUUIDs...)
+
+	assert.NoError(t, err)
+	assert.Len(t, identifiers, 1)
+
+	ids, ok := identifiers["2753c50c-b256-4814-9f0d-65c8e755aa14"]
+	assert.True(t, ok)
+	assert.Len(t, ids, 1)
+	assert.Equal(t, uppAuthority, ids[0].Authority)
+	assert.Equal(t, "6b43a14b-a5e0-3b63-a428-aa55def05fcb", ids[0].IdentifierValue)
+	serverMock.AssertExpectations(t) // failure here means the concordances API has not been called
+}
+
 func TestGetConcordancesFailsWhenNoIDsSupplied(t *testing.T) {
 	concordances := NewConcordances(&http.Client{}, "")
-	_, err := concordances.GetConcordances("tid_TestGetConcordancesFailsWhenNoIDsSupplied")
+	_, err := concordances.GetConcordances("tid_TestGetConcordancesFailsWhenNoIDsSupplied", NoAuthority)
 
 	assert.EqualError(t, err, ErrNoConceptsToSearch.Error())
 }
 
 func TestGetConcordancesFailsWhenEmptyIDsSupplied(t *testing.T) {
 	concordances := NewConcordances(&http.Client{}, "")
-	_, err := concordances.GetConcordances("tid_TestGetConcordancesFailsWhenEmptyIDsSupplied", "", "")
+	_, err := concordances.GetConcordances("tid_TestGetConcordancesFailsWhenEmptyIDsSupplied", NoAuthority, "", "")
 
-	assert.EqualError(t, err, ErrConceptUUIDsAreEmpty.Error())
+	assert.EqualError(t, err, ErrConceptIDsAreEmpty.Error())
 }
 
 func TestGetConcordancesFailsInvalidURL(t *testing.T) {
 	concordances := NewConcordances(&http.Client{}, ":#") // this triggers a invalid url during the http.NewRequest() line
-	_, err := concordances.GetConcordances("tid_TestGetConcordancesFailsInvalidURL", uuid.NewV4().String())
+	_, err := concordances.GetConcordances("tid_TestGetConcordancesFailsInvalidURL", NoAuthority, uuid.NewV4().String())
 
 	assert.Error(t, err)
 }
 
 func TestGetConcordancesRequestFails(t *testing.T) {
 	concordances := NewConcordances(&http.Client{}, "#:") // this triggers a protocol error in the client.Do()
-	_, err := concordances.GetConcordances("tid_TestGetConcordancesRequestFails", uuid.NewV4().String())
+	_, err := concordances.GetConcordances("tid_TestGetConcordancesRequestFails", NoAuthority, uuid.NewV4().String())
 
 	assert.Error(t, err)
 }
@@ -112,7 +139,7 @@ func TestGetConcordancesResponseJSONInvalid(t *testing.T) {
 	defer server.Close()
 
 	concordances := NewConcordances(&http.Client{}, server.URL)
-	_, err := concordances.GetConcordances("tid_TestGetConcordancesResponseJSONInvalid", requestedUUIDs...)
+	_, err := concordances.GetConcordances("tid_TestGetConcordancesResponseJSONInvalid", NoAuthority, requestedUUIDs...)
 
 	assert.Error(t, err)
 	serverMock.AssertExpectations(t) // failure here means the concordances API has not been called
@@ -128,7 +155,7 @@ func TestGetConcordancesFailedResponse(t *testing.T) {
 	defer server.Close()
 
 	concordances := NewConcordances(&http.Client{}, server.URL)
-	_, err := concordances.GetConcordances("tid_TestGetConcordancesFailedResponse", requestedUUIDs...)
+	_, err := concordances.GetConcordances("tid_TestGetConcordancesFailedResponse", NoAuthority, requestedUUIDs...)
 
 	assert.EqualError(t, err, "503 Service Unavailable: uh oh")
 	serverMock.AssertExpectations(t) // failure here means the concordances API has not been called
@@ -144,7 +171,7 @@ func TestGetConcordancesFailedResponseMessageDecodingAlsoFailed(t *testing.T) {
 	defer server.Close()
 
 	concordances := NewConcordances(&http.Client{}, server.URL)
-	_, err := concordances.GetConcordances("tid_TestGetConcordancesFailedResponse", requestedUUIDs...)
+	_, err := concordances.GetConcordances("tid_TestGetConcordancesFailedResponse", NoAuthority, requestedUUIDs...)
 
 	assert.EqualError(t, err, "400 Bad Request: Failed to decode message from response")
 	serverMock.AssertExpectations(t) // failure here means the concordances API has not been called
@@ -173,8 +200,15 @@ func (m *mockPublicConcordancesServer) startServer(t *testing.T) *httptest.Serve
 		assert.Equal(t, expectedUserAgent, r.Header.Get("User-Agent"))
 
 		query := r.URL.Query()
-		actualIDs, found := query[concordancesQueryParam]
-		assert.True(t, found)
+		authorityParam, foundAuthority := query[authorityQueryParam]
+		queryParam := concordancesQueryParam
+		if foundAuthority {
+			queryParam = identifierValueQueryParam
+			assert.NotEmpty(t, authorityParam)
+			assert.Empty(t, query[concordancesQueryParam])
+		}
+		actualIDs, foundConceptId := query[queryParam]
+		assert.True(t, foundConceptId)
 		assert.Equal(t, expectedIDs, actualIDs)
 
 		json, status := m.getResponse()

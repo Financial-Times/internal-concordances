@@ -62,7 +62,7 @@ func TestSearchAllIDsProvidedEmpty(t *testing.T) {
 	search := NewSearch(&http.Client{}, "")
 	_, err := search.ByIDs("tid_TestSearchNoIDsProvided", "", "", "", "")
 
-	assert.EqualError(t, err, ErrConceptUUIDsAreEmpty.Error())
+	assert.EqualError(t, err, ErrConceptIDsAreEmpty.Error())
 }
 
 func TestSearchRequestURLInvalid(t *testing.T) {
