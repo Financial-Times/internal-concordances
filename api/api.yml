@@ -39,6 +39,13 @@ paths:
           x-example:
             - 1f2c7277-5f74-3397-b852-92bcb1096021
             - 5d0fedcd-20e5-48d7-953e-b8e72865828c
+        - name: authority
+          in: query
+          description: >
+            Authority of the given identifiers.
+          required: false
+          type: string
+          x-example: "http://api.ft.com/system/UPP"
       responses:
         200:
           description: >
@@ -68,19 +75,6 @@ paths:
                       type: string
                       description: The preferred label for the concept
                       x-example: Lawrence Summers
-                    concordances:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          identifierValue:
-                            type: string
-                            description: The ID for this concept from the corresponding Authority
-                            x-example: 1f2c7277-5f74-3397-b852-92bcb1096021
-                          authority:
-                            type: string
-                            description: The authority which provided this concept identifierValue
-                            x-example: http://api.ft.com/system/UPP
                     isFTAuthor:
                       type: boolean
                       description: True if this concept is a person and an author at the FT

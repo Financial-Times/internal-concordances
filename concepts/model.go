@@ -12,7 +12,6 @@ type Concept struct {
 	APIURL       string       `json:"apiUrl,omitempty"`
 	Type         string       `json:"type,omitempty"`
 	PrefLabel    string       `json:"prefLabel,omitempty"`
-	Concordances []Identifier `json:"concordances,omitempty"`
 	IsFTAuthor   *bool        `json:"isFTAuthor,omitempty"`
 }
 

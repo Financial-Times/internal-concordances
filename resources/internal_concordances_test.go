@@ -179,10 +179,6 @@ func TestSearchByIDs(t *testing.T) {
 		"a-concorded-uuid": {
 			ID:        "http://www.ft.com/thing/a-uuid",
 			PrefLabel: "Donald Trump",
-			Concordances: []concepts.Identifier{
-				{Authority: "authority", IdentifierValue: "a-concorded-uuid"},
-				{Authority: "authority", IdentifierValue: "a-uuid"},
-			},
 		},
 	}}
 
@@ -225,9 +221,6 @@ func TestSearchByIDsOneConceptNotFound(t *testing.T) {
 		"found-this-one": {
 			ID:        "http://www.ft.com/thing/found-this-one",
 			PrefLabel: "Donald Trump",
-			Concordances: []concepts.Identifier{
-				{Authority: "authority", IdentifierValue: "found-this-one"},
-			},
 		},
 	}}
 

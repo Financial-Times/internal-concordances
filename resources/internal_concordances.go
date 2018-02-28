@@ -73,17 +73,16 @@ func writeInternalConcordanceResponse(w http.ResponseWriter, resp internalConcor
 	w.Write(jsonBytes)
 }
 
-func mergeConcordancesAndConcepts(requestedUUIDs []string, identifiers map[string][]concepts.Identifier, searchedConcepts map[string]concepts.Concept) map[string]concepts.Concept {
+func mergeConcordancesAndConcepts(requestedIDs []string, identifiers map[string][]concepts.Identifier, searchedConcepts map[string]concepts.Concept) map[string]concepts.Concept {
 	merged := make(map[string]concepts.Concept)
 
 	for uuid, concept := range searchedConcepts {
 		concordances := identifiers[uuid]
-		concept.Concordances = concordances
 
 		for _, c := range concordances {
-			for _, requestedUUID := range requestedUUIDs {
-				if c.IdentifierValue == requestedUUID {
-					merged[requestedUUID] = concept
+			for _, requestedID := range requestedIDs {
+				if c.IdentifierValue == requestedID {
+					merged[requestedID] = concept
 				}
 			}
 		}
