@@ -53,7 +53,6 @@ func (c *publicConcordancesAPI) GetConcordances(tid, authority string, ids ...st
 
 	for _, id := range ids {
 		queryParams.Add(reqParamName, id)
-
 	}
 
 	req.URL.RawQuery = queryParams.Encode()
