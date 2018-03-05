@@ -264,7 +264,7 @@ func assertConcordanceCheckConsistency(t *testing.T, check fthealth.Check) {
 	assert.Equal(t, "Concorded concepts can not be returned to clients", check.BusinessImpact)
 	assert.Equal(t, "Public Concordance API Healthcheck", check.Name)
 	assert.Equal(t, "https://dewey.ft.com/internal-concordances.html", check.PanicGuide)
-	assert.Equal(t, uint8(1), check.Severity)
+	assert.Equal(t, uint8(2), check.Severity)
 	assert.Equal(t, "Public Concordance API is not available", check.TechnicalSummary)
 }
 
