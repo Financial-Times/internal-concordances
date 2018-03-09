@@ -14,8 +14,8 @@ const conceptSearchQueryParam = "ids"
 var (
 	// ErrNoConceptsToSearch indicates the provided uuids array was empty
 	ErrNoConceptsToSearch = errors.New("no concept ids to search for")
-	// ErrConceptUUIDsAreEmpty indicates the provided uuids array only contained empty string
-	ErrConceptUUIDsAreEmpty = errors.New("provided concept ids are empty")
+	// ErrConceptIDsAreEmpty indicates the provided uuids array only contained empty string
+	ErrConceptIDsAreEmpty = errors.New("provided concept ids are empty")
 )
 
 type Search interface {
@@ -37,7 +37,7 @@ func NewSearch(client *http.Client, uri string) Search {
 }
 
 func (c *conceptSearchAPI) ByIDs(tid string, uuids ...string) (map[string]Concept, error) {
-	if err := validateUUIDs(uuids); err != nil {
+	if err := validateIDs(uuids); err != nil {
 		return nil, err
 	}
 
@@ -89,18 +89,18 @@ func stampRequest(req *http.Request, tid string) {
 	req.Header.Add("X-Request-Id", tid)
 }
 
-func validateUUIDs(uuids []string) error {
-	if len(uuids) == 0 {
+func validateIDs(ids []string) error {
+	if len(ids) == 0 {
 		return ErrNoConceptsToSearch
 	}
 
-	for _, v := range uuids {
+	for _, v := range ids {
 		if v != "" {
 			return nil
 		}
 	}
 
-	return ErrConceptUUIDsAreEmpty
+	return ErrConceptIDsAreEmpty
 }
 
 func (c *conceptSearchAPI) Check() fthealth.Check {
@@ -109,7 +109,7 @@ func (c *conceptSearchAPI) Check() fthealth.Check {
 		BusinessImpact:   "Concept information can not be returned to clients",
 		Name:             "Concept Search API Healthcheck",
 		PanicGuide:       "https://dewey.ft.com/internal-concordances.html",
-		Severity:         1,
+		Severity:         2,
 		TechnicalSummary: "Concept Search API is not available",
 		Checker:          c.gtg,
 	}

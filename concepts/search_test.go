@@ -62,7 +62,7 @@ func TestSearchAllIDsProvidedEmpty(t *testing.T) {
 	search := NewSearch(&http.Client{}, "")
 	_, err := search.ByIDs("tid_TestSearchNoIDsProvided", "", "", "", "")
 
-	assert.EqualError(t, err, ErrConceptUUIDsAreEmpty.Error())
+	assert.EqualError(t, err, ErrConceptIDsAreEmpty.Error())
 }
 
 func TestSearchRequestURLInvalid(t *testing.T) {
@@ -191,7 +191,7 @@ func assertSearchCheckConsistency(t *testing.T, check fthealth.Check) {
 	assert.Equal(t, "Concept information can not be returned to clients", check.BusinessImpact)
 	assert.Equal(t, "Concept Search API Healthcheck", check.Name)
 	assert.Equal(t, "https://dewey.ft.com/internal-concordances.html", check.PanicGuide)
-	assert.Equal(t, uint8(1), check.Severity)
+	assert.Equal(t, uint8(2), check.Severity)
 	assert.Equal(t, "Concept Search API is not available", check.TechnicalSummary)
 }
 

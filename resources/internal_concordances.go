@@ -18,14 +18,27 @@ func InternalConcordances(concordances concepts.Concordances, search concepts.Se
 		w.Header().Add("Content-Type", "application/json")
 		tid := tidutils.GetTransactionIDFromRequest(req)
 
-		ids, found := getMultiValuedParam(req, "ids")
-		if !found {
+		authority := concepts.NoAuthority
+		authorityParam, foundAuthority := getMultiValuedParam(req, "authority")
+		if foundAuthority {
+			if len(authorityParam) != 1 {
+				writeJSON("Please provide one value for 'authority' query parameter", http.StatusBadRequest, w)
+				return
+			}
+			authority = authorityParam[0]
+			if authority == "" {
+				writeJSON("Please provide a non-empty 'authority' query parameter", http.StatusBadRequest, w)
+				return
+			}
+		}
+		ids, idsFound := getMultiValuedParam(req, "ids")
+		if !idsFound {
 			writeJSON("Please provide ids to concord, using the 'ids' query parameter", http.StatusBadRequest, w)
 			return
 		}
 
-		identifiers, err := concordances.GetConcordances(tid, ids...)
-		if err == concepts.ErrConceptUUIDsAreEmpty {
+		identifiers, err := concordances.GetConcordances(tid, authority, ids...)
+		if err == concepts.ErrConceptIDsAreEmpty {
 			writeJSON("Please provide non-empty ids to concord, using the 'ids' query parameter", http.StatusBadRequest, w)
 			return
 		}
@@ -60,17 +73,16 @@ func writeInternalConcordanceResponse(w http.ResponseWriter, resp internalConcor
 	w.Write(jsonBytes)
 }
 
-func mergeConcordancesAndConcepts(requestedUUIDs []string, identifiers map[string][]concepts.Identifier, searchedConcepts map[string]concepts.Concept) map[string]concepts.Concept {
+func mergeConcordancesAndConcepts(requestedIDs []string, identifiers map[string][]concepts.Identifier, searchedConcepts map[string]concepts.Concept) map[string]concepts.Concept {
 	merged := make(map[string]concepts.Concept)
 
 	for uuid, concept := range searchedConcepts {
 		concordances := identifiers[uuid]
-		concept.Concordances = concordances
 
 		for _, c := range concordances {
-			for _, requestedUUID := range requestedUUIDs {
-				if c.IdentifierValue == requestedUUID {
-					merged[requestedUUID] = concept
+			for _, requestedID := range requestedIDs {
+				if c.IdentifierValue == requestedID {
+					merged[requestedID] = concept
 				}
 			}
 		}
