@@ -1,4 +1,4 @@
-FROM golang:1.8.3-alpine
+FROM golang:1.11.0-alpine3.8
 
 ENV PROJECT=internal-concordances
 COPY . /${PROJECT}-sources/

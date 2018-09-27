@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: /go/src/github.com/Financial-Times/internal-concordances
     docker:
-      - image: golang:1.8.3
+      - image: golang:1.11.0
         environment:
           GOPATH: /go
           CIRCLE_TEST_REPORT: /tmp/test-results
@@ -57,7 +57,7 @@ jobs:
   dredd:
     working_directory: /go/src/github.com/Financial-Times/internal-concordances
     docker:
-      - image: bankrs/golang-dredd:go1.8.3-dredd4.4.0
+      - image: bankrs/golang-dredd:go1.11.0-dredd5.1.11
         environment:
           GOPATH: /go
           PUBLIC_CONCORDANCES_ENDPOINT: https://httpbin.org/get
