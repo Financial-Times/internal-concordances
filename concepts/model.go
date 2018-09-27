@@ -8,11 +8,12 @@ import (
 )
 
 type Concept struct {
-	ID           string       `json:"id"`
-	APIURL       string       `json:"apiUrl,omitempty"`
-	Type         string       `json:"type,omitempty"`
-	PrefLabel    string       `json:"prefLabel,omitempty"`
-	IsFTAuthor   *bool        `json:"isFTAuthor,omitempty"`
+	ID           string `json:"id"`
+	APIURL       string `json:"apiUrl,omitempty"`
+	Type         string `json:"type,omitempty"`
+	PrefLabel    string `json:"prefLabel,omitempty"`
+	IsFTAuthor   *bool  `json:"isFTAuthor,omitempty"`
+	IsDeprecated bool   `json:"isDeprecated,omitempty"`
 }
 
 type Identifier struct {

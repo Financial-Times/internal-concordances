@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"strconv"
+
 	"github.com/Financial-Times/internal-concordances/concepts"
 	tidutils "github.com/Financial-Times/transactionid-utils-go"
 )
@@ -37,6 +39,20 @@ func InternalConcordances(concordances concepts.Concordances, search concepts.Se
 			return
 		}
 
+		var includeDeprecated bool
+		includeDeprecatedParam, foundIncludeDeprecated := getMultiValuedParam(req, "include_deprecated")
+		if foundIncludeDeprecated {
+			if len(includeDeprecatedParam) != 1 {
+				writeJSON("Please provide one value for 'include_deprecated' query parameter", http.StatusBadRequest, w)
+				return
+			}
+			includeDeprecatedValue, err := strconv.ParseBool(includeDeprecatedParam[0])
+			if err != nil {
+				writeJSON("Please provide a valid boolean for 'include_deprecated' query parameter", http.StatusBadRequest, w)
+				return
+			}
+			includeDeprecated = includeDeprecatedValue
+		}
 		identifiers, err := concordances.GetConcordances(tid, authority, ids...)
 		if err == concepts.ErrConceptIDsAreEmpty {
 			writeJSON("Please provide non-empty ids to concord, using the 'ids' query parameter", http.StatusBadRequest, w)
@@ -60,7 +76,7 @@ func InternalConcordances(concordances concepts.Concordances, search concepts.Se
 			return
 		}
 
-		merged := mergeConcordancesAndConcepts(ids, identifiers, concepts)
+		merged := mergeConcordancesAndConcepts(ids, identifiers, concepts, includeDeprecated)
 		resp := internalConcordancesResponse{Concepts: merged}
 
 		writeInternalConcordanceResponse(w, resp)
@@ -73,10 +89,13 @@ func writeInternalConcordanceResponse(w http.ResponseWriter, resp internalConcor
 	w.Write(jsonBytes)
 }
 
-func mergeConcordancesAndConcepts(requestedIDs []string, identifiers map[string][]concepts.Identifier, searchedConcepts map[string]concepts.Concept) map[string]concepts.Concept {
+func mergeConcordancesAndConcepts(requestedIDs []string, identifiers map[string][]concepts.Identifier, searchedConcepts map[string]concepts.Concept, includeDeprecated bool) map[string]concepts.Concept {
 	merged := make(map[string]concepts.Concept)
 
 	for uuid, concept := range searchedConcepts {
+		if !includeDeprecated && concept.IsDeprecated {
+			continue
+		}
 		concordances := identifiers[uuid]
 
 		for _, c := range concordances {

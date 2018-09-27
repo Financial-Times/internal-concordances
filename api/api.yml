@@ -46,6 +46,12 @@ paths:
           required: false
           type: string
           x-example: "http://api.ft.com/system/UPP"
+        - name: include_deprecated
+          in: query
+          description: >
+            Include the deprecated concepts too in the response
+          required: false
+          type: boolean
       responses:
         200:
           description: >
