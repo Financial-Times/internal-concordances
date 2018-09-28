@@ -23,7 +23,7 @@ RUN apk --no-cache --virtual .build-dependencies add git curl \
   && $GOPATH/bin/dep ensure -vendor-only \
   && go build -ldflags="${LDFLAGS}" \
   && mv ${PROJECT} /${PROJECT} \
-  && mv ./api/api.yml / \
+  && mv ./_ft/api.yml / \
   && apk del .build-dependencies \
   && rm -rf $GOPATH /var/cache/apk/*
 
