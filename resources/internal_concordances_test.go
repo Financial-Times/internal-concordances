@@ -209,7 +209,7 @@ func TestSearchByIDsOneConceptNotFound(t *testing.T) {
 		},
 	}
 
-	concordances.On("GetConcordances", "tid_TestSearchByIDsOneConceptNotFound", "", []string{"found-this-one", "but-not-this-one"}).
+	concordances.On("GetConcordances", "tid_TestSearchByIDsOneConceptNotFound", "", []string{"but-not-this-one", "found-this-one"}).
 		Return(identifiers, nil)
 
 	expectedConcepts := map[string]concepts.Concept{

@@ -4,6 +4,7 @@ import (
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
 	"github.com/Financial-Times/internal-concordances/concepts"
 	"github.com/stretchr/testify/mock"
+	"sort"
 )
 
 type mockConcordances struct {
@@ -11,6 +12,7 @@ type mockConcordances struct {
 }
 
 func (m *mockConcordances) GetConcordances(tid, authority string, uuids ...string) (map[string][]concepts.Identifier, error) {
+	sort.Strings(uuids)
 	args := m.Called(tid, authority, uuids)
 	return args.Get(0).(map[string][]concepts.Identifier), args.Error(1)
 }
@@ -25,6 +27,7 @@ type mockSearch struct {
 }
 
 func (m *mockSearch) ByIDs(tid string, uuids ...string) (map[string]concepts.Concept, error) {
+	sort.Strings(uuids)
 	args := m.Called(tid, uuids)
 	return args.Get(0).(map[string]concepts.Concept), args.Error(1)
 }
