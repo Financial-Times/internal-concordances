@@ -1,0 +1,24 @@
+version: "1.0.0"
+fixtures:
+  /concordances:
+    get:
+      body:
+        concepts:
+          "1f2c7277-5f74-3397-b852-92bcb1096021":
+            id: "http://www.ft.com/thing/1f2c7277-5f74-3397-b852-92bcb1096021"
+            apiUrl: "http://api.ft.com/people/1f2c7277-5f74-3397-b852-92bcb1096021"
+            type: "http://www.ft.com/ontology/person/Person"
+            prefLabel: "Michael Hunter"
+            isFTAuthor: true
+          "5d0fedcd-20e5-48d7-953e-b8e72865828c":
+            id: "http://www.ft.com/thing/5d0fedcd-20e5-48d7-953e-b8e72865828c"
+            apiUrl: "http://api.ft.com/people/5d0fedcd-20e5-48d7-953e-b8e72865828c"
+            type: "http://www.ft.com/ontology/person/Person"
+            prefLabel: "Eric Platt"
+            isFTAuthor: false
+      headers:
+        content-type: application/json
+      status: 200
+  /__gtg:
+    get:
+      status: 200

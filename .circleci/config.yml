@@ -60,7 +60,9 @@ jobs:
       - image: bankrs/golang-dredd:go1.11.0-dredd5.1.11
         environment:
           GOPATH: /go
-          PUBLIC_CONCORDANCES_ENDPOINT: https://httpbin.org/get
+          PUBLIC_CONCORDANCES_ENDPOINT: http://localhost:9000
+          CONCEPT_SEARCH_ENDPOINT: http://localhost:9000
+      - image: peteclarkft/ersatz:stable
     steps:
       - checkout
       - run:
@@ -68,7 +70,10 @@ jobs:
           command: |
             curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
       - run:
-          name: Download vendored dependencies
+          name: Load ersatz-fixtures.yml to ersatz image
+          command: "curl -X POST --data-binary @_ft/ersatz-fixtures.yml -H \"Content-type: text/x-yaml\" http://localhost:9000/__configure"
+      - run:
+          name: Import libraries
           command: dep ensure -v -vendor-only
       - run:
           name: Go Build
@@ -76,13 +81,12 @@ jobs:
       - run:
           name: Dredd API Testing
           command: dredd
-
 workflows:
   version: 2
   test-and-build-docker:
     jobs:
       - build
-      #- dredd
+      - dredd
       - dockerfile:
           requires:
             - build
