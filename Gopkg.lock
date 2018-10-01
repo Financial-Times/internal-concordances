@@ -10,8 +10,14 @@
 [[projects]]
   name = "github.com/Financial-Times/go-fthealth"
   packages = ["v1_1"]
-  revision = "1b007e2b37b7936dfb6671fa17e5a29fd35a08ea"
-  version = "0.4.0"
+  revision = "3d8eb430d5b5e1f3a3c53e817504e796a7d6cc9f"
+  version = "0.5.0"
+
+[[projects]]
+  name = "github.com/Financial-Times/go-logger"
+  packages = ["."]
+  revision = "febee6537e90971bab6f6fe60b71b4a0562dcab3"
+  version = "1.0.0"
 
 [[projects]]
   name = "github.com/Financial-Times/http-handlers-go"
@@ -121,6 +127,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "af5f2aed13fc7632e811569eb95256e5ef2ff5c7fd745704f077dcd67281d3e7"
+  inputs-digest = "229ab0c4826b8d6eea711ea50380205c794b7fcff69c18551b9a74bf65b90388"
   solver-name = "gps-cdcl"
   solver-version = 1

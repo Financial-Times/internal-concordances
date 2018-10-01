@@ -39,7 +39,7 @@ func InternalConcordances(concordances concepts.Concordances, search concepts.Se
 			return
 		}
 
-		var includeDeprecated bool
+		includeDeprecated := true
 		includeDeprecatedParam, foundIncludeDeprecated := getMultiValuedParam(req, "include_deprecated")
 		if foundIncludeDeprecated {
 			if len(includeDeprecatedParam) != 1 {

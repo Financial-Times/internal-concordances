@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Financial-Times/api-endpoint"
+	log "github.com/Financial-Times/go-logger"
 	"github.com/Financial-Times/http-handlers-go/httphandlers"
 	"github.com/Financial-Times/internal-concordances/concepts"
 	"github.com/Financial-Times/internal-concordances/health"
@@ -14,7 +15,6 @@ import (
 	"github.com/husobee/vestigo"
 	"github.com/jawher/mow.cli"
 	"github.com/rcrowley/go-metrics"
-	log "github.com/sirupsen/logrus"
 )
 
 const appDescription = "UPP Internal Concordances"
@@ -59,15 +59,22 @@ func main() {
 
 	apiYml := app.String(cli.StringOpt{
 		Name:   "api-yml",
-		Value:  "./_ft/api.yml",
+		Value:  "/api.yml",
 		Desc:   "Location of the API Swagger YML file.",
 		EnvVar: "API_YML",
 	})
 
-	log.SetFormatter(&log.JSONFormatter{})
-	log.SetLevel(log.InfoLevel)
+	logLevel := app.String(cli.StringOpt{
+		Name:   "logLevel",
+		Value:  "INFO",
+		Desc:   "Logging level (DEBUG, INFO, WARN, ERROR)",
+		EnvVar: "LOG_LEVEL",
+	})
+
+	log.InitLogger(*appSystemCode, *logLevel)
 
 	app.Action = func() {
+
 		log.Infof("[Startup] %v is starting", *appSystemCode)
 		log.Infof("System code: %s, App Name: %s, Port: %s", *appSystemCode, *appName, *port)
 
@@ -92,7 +99,7 @@ func serveEndpoints(port string, apiYml *string, healthService *health.HealthSer
 	r := vestigo.NewRouter()
 
 	var monitoringRouter http.Handler = r
-	monitoringRouter = httphandlers.TransactionAwareRequestLoggingHandler(log.StandardLogger(), monitoringRouter)
+	monitoringRouter = httphandlers.TransactionAwareRequestLoggingHandler(log.Logger(), monitoringRouter)
 	monitoringRouter = httphandlers.HTTPMetricsHandler(metrics.DefaultRegistry, monitoringRouter)
 
 	r.Get("/__health", healthService.HealthCheckHandleFunc())

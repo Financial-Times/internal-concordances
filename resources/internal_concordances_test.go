@@ -267,6 +267,11 @@ func TestSearchByIDsIncludeDeprecatedNotSet(t *testing.T) {
 			ID:        "http://www.ft.com/thing/active-concept",
 			PrefLabel: "Donald Trump",
 		},
+		"deprecated-concept": {
+			ID:           "http://www.ft.com/thing/deprecated-concept",
+			PrefLabel:    "NOT Donald Trump",
+			IsDeprecated: true,
+		},
 	}}
 
 	search.On("ByIDs", "tid_TestSearchByIDsIncludeDeprecated", []string{"active-concept", "deprecated-concept"}).
@@ -283,7 +288,53 @@ func TestSearchByIDsIncludeDeprecatedNotSet(t *testing.T) {
 	search.AssertExpectations(t)
 }
 
-func TestSearchByIDsIncludeDeprecatedSet(t *testing.T) {
+func TestSearchByIDsIncludeDeprecatedSetFalse(t *testing.T) {
+	concordances := new(mockConcordances)
+	search := new(mockSearch)
+
+	req := httptest.NewRequest("GET", "/?ids=active-concept&ids=deprecated-concept&include_deprecated=false", nil)
+	req.Header.Add("X-Request-Id", "tid_TestSearchByIDsIncludeDeprecated")
+	w := httptest.NewRecorder()
+
+	identifiers := map[string][]concepts.Identifier{
+		"active-concept": {
+			{Authority: "authority", IdentifierValue: "active-concept"},
+		},
+		"deprecated-concept": {
+			{Authority: "authority", IdentifierValue: "deprecated-concept"},
+		},
+	}
+
+	concordances.On("GetConcordances", "tid_TestSearchByIDsIncludeDeprecated", "", []string{"active-concept", "deprecated-concept"}).
+		Return(identifiers, nil)
+
+	expectedConcepts := map[string]concepts.Concept{
+		"active-concept":     {ID: "http://www.ft.com/thing/active-concept", PrefLabel: "Donald Trump"},
+		"deprecated-concept": {ID: "http://www.ft.com/thing/deprecated-concept", PrefLabel: "NOT Donald Trump", IsDeprecated: true},
+	}
+
+	expectedResponse := internalConcordancesResponse{Concepts: map[string]concepts.Concept{
+		"active-concept": {
+			ID:        "http://www.ft.com/thing/active-concept",
+			PrefLabel: "Donald Trump",
+		},
+	}}
+
+	search.On("ByIDs", "tid_TestSearchByIDsIncludeDeprecated", []string{"active-concept", "deprecated-concept"}).
+		Return(expectedConcepts, nil)
+
+	InternalConcordances(concordances, search)(w, req)
+
+	b, _ := json.Marshal(expectedResponse)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, string(b), w.Body.String())
+
+	concordances.AssertExpectations(t)
+	search.AssertExpectations(t)
+}
+
+func TestSearchByIDsIncludeDeprecatedSetTrue(t *testing.T) {
 	concordances := new(mockConcordances)
 	search := new(mockSearch)
 

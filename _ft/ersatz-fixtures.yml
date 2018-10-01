@@ -16,6 +16,7 @@ fixtures:
             type: "http://www.ft.com/ontology/person/Person"
             prefLabel: "Eric Platt"
             isFTAuthor: false
+            isDeprecated: true
       headers:
         content-type: application/json
       status: 200

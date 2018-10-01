@@ -1,10 +1,11 @@
 package resources
 
 import (
+	"sort"
+
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
 	"github.com/Financial-Times/internal-concordances/concepts"
 	"github.com/stretchr/testify/mock"
-	"sort"
 )
 
 type mockConcordances struct {
