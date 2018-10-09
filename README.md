@@ -70,7 +70,5 @@ At the moment, both the `/__gtg` and `/__health` endpoints perform no checks (ef
 
 ### Logging
 
-* The application uses [logrus](https://github.com/sirupsen/logrus); the log file is initialised in [main.go](main.go).
-* Logging requires an `env` app parameter, for all environments other than `local` logs are written to file.
-* When running locally, logs are written to console. If you want to log locally to file, you need to pass in an env parameter that is != `local`.
-* NOTE: `/__build-info` and `/__gtg` endpoints are not logged as they are called every second from varnish/vulcand and this information is not needed in logs/splunk.
+* The application uses [logrus](https://github.com/sirupsen/logrus) wrapped by [go-logger](https://github.com/Financial-Times/go-logger); the log file is initialised in [main.go](main.go).
+* NOTE: `/__build-info` and `/__gtg` endpoints are not logged as they are called every second from varnish and this information is not needed in logs/splunk.

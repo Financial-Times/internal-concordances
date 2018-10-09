@@ -46,6 +46,12 @@ paths:
           required: false
           type: string
           x-example: "http://api.ft.com/system/UPP"
+        - name: include_deprecated
+          in: query
+          description: >
+            Include the deprecated concepts too in the response
+          required: false
+          type: boolean
       responses:
         200:
           description: >
@@ -79,6 +85,10 @@ paths:
                       type: boolean
                       description: True if this concept is a person and an author at the FT
                       x-example: false
+                    isDeprecated:
+                      type: boolean
+                      description: True if this concept is deprecated
+                      x-example: true
         400:
           description: You must supply at least one non-empty 'ids' parameter
         503:

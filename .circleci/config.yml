@@ -3,10 +3,10 @@ jobs:
   build:
     working_directory: /go/src/github.com/Financial-Times/internal-concordances
     docker:
-      - image: golang:1.8.3
+      - image: golang:1.11.0
         environment:
           GOPATH: /go
-          CIRCLE_TEST_REPORTS: /tmp/test-results
+          CIRCLE_TEST_REPORT: /tmp/test-results
           CIRCLE_COVERAGE_REPORT: /tmp/coverage-results
     steps:
       - checkout
@@ -15,24 +15,22 @@ jobs:
           command: |
             go get -u github.com/mattn/goveralls
             go get -u github.com/jstemmer/go-junit-report
-            go get -u github.com/kardianos/govendor
-            go get -u github.com/haya14busa/goverage
+            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
       - run:
           name: Test Results
           command: |
-            mkdir -p ${CIRCLE_TEST_REPORTS}
+            mkdir -p ${CIRCLE_TEST_REPORT}
             mkdir -p ${CIRCLE_COVERAGE_REPORT}
       - run:
-          name: Govendor Sync
-          command: govendor sync -v
+          name: Download vendored dependencies
+          command: dep ensure -v -vendor-only
       - run:
           name: Go Build
           command: go build -v
       - run:
           name: Run Tests
           command: |
-            govendor test -race -v +local | /go/bin/go-junit-report > ${CIRCLE_TEST_REPORTS}/main.xml
-            goverage -covermode=atomic -race -coverprofile=${CIRCLE_COVERAGE_REPORT}/coverage.out ./...
+            go test -v -race -cover -coverprofile=${CIRCLE_COVERAGE_REPORT}/coverage.out ./... | go-junit-report > ${CIRCLE_TEST_REPORT}/junit.xml
       - run:
           name: Upload Coverage
           command: /go/bin/goveralls -coverprofile=${CIRCLE_COVERAGE_REPORT}/coverage.out -service=circle-ci -repotoken=$COVERALLS_TOKEN
@@ -59,32 +57,36 @@ jobs:
   dredd:
     working_directory: /go/src/github.com/Financial-Times/internal-concordances
     docker:
-      - image: bankrs/golang-dredd:go1.8.3-dredd4.4.0
+      - image: bankrs/golang-dredd:go1.11.0-dredd5.1.11
         environment:
           GOPATH: /go
-          PUBLIC_CONCORDANCES_ENDPOINT: https://httpbin.org/get
+          PUBLIC_CONCORDANCES_ENDPOINT: http://localhost:9000
+          CONCEPT_SEARCH_ENDPOINT: http://localhost:9000
+      - image: peteclarkft/ersatz:stable
     steps:
       - checkout
       - run:
           name: External Dependencies
           command: |
-            go get -u github.com/kardianos/govendor
+            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
       - run:
-          name: Govendor Sync
-          command: govendor sync -v
+          name: Load ersatz-fixtures.yml to ersatz image
+          command: "curl -X POST --data-binary @_ft/ersatz-fixtures.yml -H \"Content-type: text/x-yaml\" http://localhost:9000/__configure"
+      - run:
+          name: Import libraries
+          command: dep ensure -v -vendor-only
       - run:
           name: Go Build
           command: go build -v
       - run:
           name: Dredd API Testing
           command: dredd
-
 workflows:
   version: 2
   test-and-build-docker:
     jobs:
       - build
-      #- dredd
+      - dredd
       - dockerfile:
           requires:
             - build
