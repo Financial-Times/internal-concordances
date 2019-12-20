@@ -1,18 +1,19 @@
 # Internal Concordances
 
-Internal UPP Concordances API which accepts a list of concept ids, concords them, and returns them as an array of UPP concepts.
+[![Circle CI](https://circleci.com/gh/Financial-Times/internal-concordances.svg?style=shield)](https://circleci.com/gh/Financial-Times/internal-concordances)
+[![Go Report Card](https://goreportcard.com/badge/github.com/Financial-Times/internal-concordances)](https://goreportcard.com/report/github.com/Financial-Times/internal-concordances)
+[![Coverage Status](https://coveralls.io/repos/github/Financial-Times/internal-concordances/badge.svg)](https://coveralls.io/github/Financial-Times/internal-concordances)
+
+Internal UPP Concordances API which accepts a list of concept IDs, concords them, and returns them as an array of UPP concepts.
 
 ## Installation
 
 Download the source code, dependencies and test dependencies:
 
 ```
-go get -u github.com/kardianos/govendor
-mkdir $GOPATH/src/github.com/Financial-Times/internal-concordances
-cd $GOPATH/src/github.com/Financial-Times
 git clone https://github.com/Financial-Times/internal-concordances.git
-cd internal-concordances && govendor sync
-go build .
+cd internal-concordances 
+go build -mod=readonly .
 ```
 
 ## Running locally
@@ -20,8 +21,7 @@ go build .
 1. Run the tests and install the binary:
 
 ```
-govendor sync
-govendor test -v -race +local
+go test -mod=readonly -race ./...
 go install
 ```
 
