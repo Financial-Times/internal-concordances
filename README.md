@@ -13,7 +13,7 @@ Download the source code, dependencies and test dependencies:
 ```
 git clone https://github.com/Financial-Times/internal-concordances.git
 cd internal-concordances 
-go build -mod=readonly .
+go build -mod=readonly
 ```
 
 ## Running locally
