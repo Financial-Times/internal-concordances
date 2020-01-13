@@ -108,7 +108,7 @@ func (c *conceptSearchAPI) Check() fthealth.Check {
 		ID:               "concept-search-api",
 		BusinessImpact:   "Concept information can not be returned to clients",
 		Name:             "Concept Search API Healthcheck",
-		PanicGuide:       "https://dewey.ft.com/internal-concordances.html",
+		PanicGuide:       "https://runbooks.in.ft.com/internal-concordances",
 		Severity:         2,
 		TechnicalSummary: "Concept Search API is not available",
 		Checker:          c.gtg,

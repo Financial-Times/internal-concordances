@@ -96,7 +96,7 @@ func (c *publicConcordancesAPI) Check() fthealth.Check {
 		ID:               "public-concordance-api",
 		BusinessImpact:   "Concorded concepts can not be returned to clients",
 		Name:             "Public Concordance API Healthcheck",
-		PanicGuide:       "https://dewey.ft.com/internal-concordances.html",
+		PanicGuide:       "https://runbooks.in.ft.com/internal-concordances",
 		Severity:         2,
 		TechnicalSummary: "Public Concordance API is not available",
 		Checker:          c.gtg,

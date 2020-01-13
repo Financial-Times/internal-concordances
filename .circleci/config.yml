@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: /go/src/github.com/Financial-Times/internal-concordances
     docker:
-      - image: golang:1.11.0
+      - image: golang:1
         environment:
           GOPATH: /go
           CIRCLE_TEST_REPORT: /tmp/test-results
@@ -13,24 +13,24 @@ jobs:
       - run:
           name: External Dependencies
           command: |
-            go get -u github.com/mattn/goveralls
-            go get -u github.com/jstemmer/go-junit-report
-            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+            GO111MODULE=off go get github.com/mattn/goveralls
+            GO111MODULE=off go get github.com/jstemmer/go-junit-report
+            curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.18.0
+            wget https://raw.githubusercontent.com/Financial-Times/upp-coding-standard/v1.0.0/golangci-config/.golangci.yml         
       - run:
           name: Test Results
           command: |
             mkdir -p ${CIRCLE_TEST_REPORT}
             mkdir -p ${CIRCLE_COVERAGE_REPORT}
       - run:
-          name: Download vendored dependencies
-          command: dep ensure -v -vendor-only
-      - run:
           name: Go Build
-          command: go build -v
+          command: go build -mod=readonly -v
+        - run:
+          name: Run linters
+          command: golangci-lint run --new-from-rev=$(git rev-parse origin/master) --config .golangci.yml
       - run:
           name: Run Tests
-          command: |
-            go test -v -race -cover -coverprofile=${CIRCLE_COVERAGE_REPORT}/coverage.out ./... | go-junit-report > ${CIRCLE_TEST_REPORT}/junit.xml
+          command: go test -mod=readonly -v -race -cover -coverprofile=${CIRCLE_COVERAGE_REPORT}/coverage.out ./... | go-junit-report > ${CIRCLE_TEST_REPORT}/junit.xml
       - run:
           name: Upload Coverage
           command: /go/bin/goveralls -coverprofile=${CIRCLE_COVERAGE_REPORT}/coverage.out -service=circle-ci -repotoken=$COVERALLS_TOKEN
@@ -39,13 +39,13 @@ jobs:
   dockerfile:
     working_directory: /internal-concordances
     docker:
-      - image: docker:17.09.0-git
+      - image: docker:18
     steps:
       - checkout
       - setup_docker_engine
       - run:
           name: Build Dockerfile
-          command: docker build -t test/internal-concordances .
+          command: "docker build -t test/internal-concordances ."
       - run:
           name: Run and Test Container
           command: |
@@ -57,7 +57,7 @@ jobs:
   dredd:
     working_directory: /go/src/github.com/Financial-Times/internal-concordances
     docker:
-      - image: bankrs/golang-dredd:go1.11.0-dredd5.1.11
+      - image: golang:1
         environment:
           GOPATH: /go
           PUBLIC_CONCORDANCES_ENDPOINT: http://localhost:9000
@@ -66,18 +66,18 @@ jobs:
     steps:
       - checkout
       - run:
-          name: External Dependencies
-          command: |
-            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-      - run:
           name: Load ersatz-fixtures.yml to ersatz image
           command: "curl -X POST --data-binary @_ft/ersatz-fixtures.yml -H \"Content-type: text/x-yaml\" http://localhost:9000/__configure"
       - run:
-          name: Import libraries
-          command: dep ensure -v -vendor-only
-      - run:
           name: Go Build
-          command: go build -v
+          command: go build -mod=readonly -v
+      - run:
+          name: Download dredd
+          command: |
+            curl -sL https://deb.nodesource.com/setup_11.x | bash -
+            DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs=11.\*
+            npm install -g --unsafe-perm --loglevel warn --user 0 --no-progress dredd@8.0.0
+            rm -rf /var/lib/apt/lists/*
       - run:
           name: Dredd API Testing
           command: dredd
