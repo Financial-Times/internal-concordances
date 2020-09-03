@@ -4,7 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/Financial-Times/internal-concordances)](https://goreportcard.com/report/github.com/Financial-Times/internal-concordances)
 [![Coverage Status](https://coveralls.io/repos/github/Financial-Times/internal-concordances/badge.svg)](https://coveralls.io/github/Financial-Times/internal-concordances)
 
-Internal UPP Concordances API which accepts a list of concept IDs, concords them, and returns them as an array of UPP concepts.
+Internal UPP Concordances is an API which accepts a list of concept IDs, concords them, and returns them as an array of UPP concepts.
 
 ## Installation
 
