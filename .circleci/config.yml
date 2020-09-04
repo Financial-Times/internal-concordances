@@ -45,15 +45,7 @@ jobs:
       - setup_docker_engine
       - run:
           name: Build Dockerfile
-          command: "docker build -t test/internal-concordances ."
-      - run:
-          name: Run and Test Container
-          command: |
-            export CONTAINER_HASH=$(docker run -d -p 8080:8080 test/internal-concordances)
-            docker exec ${CONTAINER_HASH} apk update
-            docker exec ${CONTAINER_HASH} apk add curl
-            docker exec ${CONTAINER_HASH} curl --retry-connrefused --retry 10 --retry-delay 3 http://localhost:8080/__health
-            docker kill ${CONTAINER_HASH}
+          command: docker build .
   dredd:
     working_directory: /go/src/github.com/Financial-Times/internal-concordances
     docker:
