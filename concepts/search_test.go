@@ -1,9 +1,11 @@
 package concepts
 
 import (
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
@@ -164,7 +166,8 @@ func TestSearchUnhappyCheckDueInvalidURL(t *testing.T) {
 	check := search.Check()
 	assertSearchCheckConsistency(t, check)
 	_, err := check.Checker()
-	assert.EqualError(t, err, "parse :: missing protocol scheme")
+	var urlError *url.Error
+	assert.True(t, errors.As(err, &urlError))
 }
 
 func TestSearchUnhappyCheckDueHTTPCallError(t *testing.T) {
@@ -172,7 +175,8 @@ func TestSearchUnhappyCheckDueHTTPCallError(t *testing.T) {
 	check := search.Check()
 	assertSearchCheckConsistency(t, check)
 	_, err := check.Checker()
-	assert.EqualError(t, err, "Get /__gtg: unsupported protocol scheme \"\"")
+	var urlError *url.Error
+	assert.True(t, errors.As(err, &urlError))
 }
 
 func TestSearchUnhappyCheckDueNon200HTTPStatus(t *testing.T) {
