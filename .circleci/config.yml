@@ -25,7 +25,7 @@ jobs:
       - run:
           name: Go Build
           command: go build -mod=readonly -v
-        - run:
+      - run:
           name: Run linters
           command: golangci-lint run --new-from-rev=$(git rev-parse origin/master) --config .golangci.yml
       - run:
