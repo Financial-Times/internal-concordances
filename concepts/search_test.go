@@ -8,7 +8,7 @@ import (
 
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
 	"github.com/husobee/vestigo"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -164,7 +164,7 @@ func TestSearchUnhappyCheckDueInvalidURL(t *testing.T) {
 	check := search.Check()
 	assertSearchCheckConsistency(t, check)
 	_, err := check.Checker()
-	assert.EqualError(t, err, "parse :: missing protocol scheme")
+	assert.EqualError(t, err, "parse \":\": missing protocol scheme")
 }
 
 func TestSearchUnhappyCheckDueHTTPCallError(t *testing.T) {
@@ -172,7 +172,7 @@ func TestSearchUnhappyCheckDueHTTPCallError(t *testing.T) {
 	check := search.Check()
 	assertSearchCheckConsistency(t, check)
 	_, err := check.Checker()
-	assert.EqualError(t, err, "Get /__gtg: unsupported protocol scheme \"\"")
+	assert.EqualError(t, err, "Get \"/__gtg\": unsupported protocol scheme \"\"")
 }
 
 func TestSearchUnhappyCheckDueNon200HTTPStatus(t *testing.T) {
