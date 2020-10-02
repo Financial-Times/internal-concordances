@@ -35,4 +35,4 @@ runbooks:
     # runbook.md tries to parse the system code from the runbook's filename (format: my-sys-code_runbook.md)
     systemCodes:
         # paths are relative to root, omitting ./ (case-insensitive)
-        internal-concordances: runbooks/internal-concordances.md
+        internal-concordances: runbooks/runbook.md
