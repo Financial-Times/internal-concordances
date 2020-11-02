@@ -2,4 +2,3 @@
 replicaCount: 2
 service:
   name: internal-concordances
-eksCluster: true
