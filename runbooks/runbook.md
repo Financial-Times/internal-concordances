@@ -18,26 +18,6 @@ Bronze
 
 Production
 
-## Delivered By
-
-content
-
-## Supported By
-
-content
-
-## Known About By
-
-- elitsa.pavlova
-- kalin.arsov
-- miroslav.gatsanoga
-- ivan.nikolov
-- marina.chompalova
-- donislav.belev
-- mihail.mihaylov
-- boyko.boykov
-- dimitar.terziev
-
 ## Host Platform
 
 AWS
@@ -53,11 +33,6 @@ No
 ## Contains Sensitive Data
 
 No
-
-## Dependencies
-
-- up-csa
-- public-concordances-api
 
 ## Failover Architecture Type
 
