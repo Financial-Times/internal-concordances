@@ -9,8 +9,8 @@ import (
 	"testing"
 
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
+	uuid "github.com/google/uuid"
 	"github.com/husobee/vestigo"
-	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -20,7 +20,7 @@ const expectedUserAgent = "UPP internal-concordances"
 
 func TestGetConcordancesEmptyResponse(t *testing.T) {
 	serverMock := new(mockPublicConcordancesServer)
-	requestedUUIDs := []string{uuid.NewV4().String()}
+	requestedUUIDs := []string{uuid.New().String()}
 	serverMock.On("getRequest").Return("tid_TestGetConcordancesEmptyResponse", requestedUUIDs)
 	serverMock.On("getResponse").Return(`{}`, http.StatusOK)
 
@@ -37,7 +37,7 @@ func TestGetConcordancesEmptyResponse(t *testing.T) {
 
 func TestGetConcordancesAtLeastOneNonEmptyID(t *testing.T) {
 	serverMock := new(mockPublicConcordancesServer)
-	requestedUUIDs := []string{"", "", uuid.NewV4().String()}
+	requestedUUIDs := []string{"", "", uuid.New().String()}
 	serverMock.On("getRequest").Return("tid_TestGetConcordancesAtLeastOneNonEmptyID", requestedUUIDs)
 	serverMock.On("getResponse").Return(`{}`, http.StatusOK) // respond with an empty body, so no data will be returned, but if the test passes then the test case is successful.
 
@@ -54,7 +54,7 @@ func TestGetConcordancesAtLeastOneNonEmptyID(t *testing.T) {
 
 func TestGetConcordances(t *testing.T) {
 	serverMock := new(mockPublicConcordancesServer)
-	requestedUUIDs := []string{uuid.NewV4().String()}
+	requestedUUIDs := []string{uuid.New().String()}
 	serverMock.On("getRequest").Return("tid_TestGetEmptyConcordances", requestedUUIDs)
 
 	concordancesResp, err := ioutil.ReadFile("./_fixtures/concordances_response.json")
@@ -78,7 +78,7 @@ func TestGetConcordances(t *testing.T) {
 
 func TestGetConcordancesByAuthority(t *testing.T) {
 	serverMock := new(mockPublicConcordancesServer)
-	requestedUUIDs := []string{uuid.NewV4().String()}
+	requestedUUIDs := []string{uuid.New().String()}
 	serverMock.On("getRequest").Return("tid_TestGetConcordancesByAuthority", requestedUUIDs)
 
 	concordancesResp, err := ioutil.ReadFile("./_fixtures/concordances_by_authority_response.json")
@@ -119,21 +119,21 @@ func TestGetConcordancesFailsWhenEmptyIDsSupplied(t *testing.T) {
 
 func TestGetConcordancesFailsInvalidURL(t *testing.T) {
 	concordances := NewConcordances(&http.Client{}, ":#") // this triggers a invalid url during the http.NewRequest() line
-	_, err := concordances.GetConcordances("tid_TestGetConcordancesFailsInvalidURL", NoAuthority, uuid.NewV4().String())
+	_, err := concordances.GetConcordances("tid_TestGetConcordancesFailsInvalidURL", NoAuthority, uuid.New().String())
 
 	assert.Error(t, err)
 }
 
 func TestGetConcordancesRequestFails(t *testing.T) {
 	concordances := NewConcordances(&http.Client{}, "#:") // this triggers a protocol error in the client.Do()
-	_, err := concordances.GetConcordances("tid_TestGetConcordancesRequestFails", NoAuthority, uuid.NewV4().String())
+	_, err := concordances.GetConcordances("tid_TestGetConcordancesRequestFails", NoAuthority, uuid.New().String())
 
 	assert.Error(t, err)
 }
 
 func TestGetConcordancesResponseJSONInvalid(t *testing.T) {
 	serverMock := new(mockPublicConcordancesServer)
-	requestedUUIDs := []string{"", "", uuid.NewV4().String()}
+	requestedUUIDs := []string{"", "", uuid.New().String()}
 	serverMock.On("getRequest").Return("tid_TestGetConcordancesResponseJSONInvalid", requestedUUIDs)
 	serverMock.On("getResponse").Return(`{`, http.StatusOK)
 
@@ -149,7 +149,7 @@ func TestGetConcordancesResponseJSONInvalid(t *testing.T) {
 
 func TestGetConcordancesFailedResponse(t *testing.T) {
 	serverMock := new(mockPublicConcordancesServer)
-	requestedUUIDs := []string{"", "", uuid.NewV4().String()}
+	requestedUUIDs := []string{"", "", uuid.New().String()}
 	serverMock.On("getRequest").Return("tid_TestGetConcordancesFailedResponse", requestedUUIDs)
 	serverMock.On("getResponse").Return(`{"message":"uh oh"}`, http.StatusServiceUnavailable)
 
@@ -165,7 +165,7 @@ func TestGetConcordancesFailedResponse(t *testing.T) {
 
 func TestGetConcordancesFailedResponseMessageDecodingAlsoFailed(t *testing.T) {
 	serverMock := new(mockPublicConcordancesServer)
-	requestedUUIDs := []string{"", "", uuid.NewV4().String()}
+	requestedUUIDs := []string{"", "", uuid.New().String()}
 	serverMock.On("getRequest").Return("tid_TestGetConcordancesFailedResponse", requestedUUIDs)
 	serverMock.On("getResponse").Return(`{`, http.StatusBadRequest)
 
