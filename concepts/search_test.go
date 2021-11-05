@@ -9,8 +9,8 @@ import (
 	"testing"
 
 	fthealth "github.com/Financial-Times/go-fthealth/v1_1"
+	uuid "github.com/google/uuid"
 	"github.com/husobee/vestigo"
-	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -18,7 +18,7 @@ import (
 
 func TestSearchByIDsNoResults(t *testing.T) {
 	serverMock := new(mockConceptSearchAPI)
-	requestedUUIDs := []string{uuid.NewV4().String()}
+	requestedUUIDs := []string{uuid.New().String()}
 	serverMock.On("getRequest").Return("tid_TestSearchByIDsNoResults", requestedUUIDs)
 	serverMock.On("getResponse").Return(`{}`, http.StatusOK)
 
@@ -35,7 +35,7 @@ func TestSearchByIDsNoResults(t *testing.T) {
 
 func TestSearchByIDs(t *testing.T) {
 	serverMock := new(mockConceptSearchAPI)
-	requestedUUIDs := []string{uuid.NewV4().String()}
+	requestedUUIDs := []string{uuid.New().String()}
 	serverMock.On("getRequest").Return("tid_TestSearchByIDs", requestedUUIDs)
 
 	searchResp, err := ioutil.ReadFile("./_fixtures/search_response.json")
@@ -69,21 +69,21 @@ func TestSearchAllIDsProvidedEmpty(t *testing.T) {
 
 func TestSearchRequestURLInvalid(t *testing.T) {
 	search := NewSearch(&http.Client{}, ":#")
-	_, err := search.ByIDs("tid_TestSearchRequestURLInvalid", uuid.NewV4().String())
+	_, err := search.ByIDs("tid_TestSearchRequestURLInvalid", uuid.New().String())
 
 	assert.Error(t, err)
 }
 
 func TestSearchRequestFails(t *testing.T) {
 	search := NewSearch(&http.Client{}, "#:")
-	_, err := search.ByIDs("tid_TestSearchRequestFails", uuid.NewV4().String())
+	_, err := search.ByIDs("tid_TestSearchRequestFails", uuid.New().String())
 
 	assert.Error(t, err)
 }
 
 func TestSearchResponseFailed(t *testing.T) {
 	serverMock := new(mockConceptSearchAPI)
-	requestedUUIDs := []string{uuid.NewV4().String()}
+	requestedUUIDs := []string{uuid.New().String()}
 	serverMock.On("getRequest").Return("tid_TestSearchResponseFailed", requestedUUIDs)
 	serverMock.On("getResponse").Return(`{"message":"forbidden!!!!!"}`, http.StatusForbidden)
 
@@ -99,7 +99,7 @@ func TestSearchResponseFailed(t *testing.T) {
 
 func TestSearchResponseInvalidJSON(t *testing.T) {
 	serverMock := new(mockConceptSearchAPI)
-	requestedUUIDs := []string{uuid.NewV4().String()}
+	requestedUUIDs := []string{uuid.New().String()}
 	serverMock.On("getRequest").Return("tid_TestSearchResponseInvalidJSON", requestedUUIDs)
 	serverMock.On("getResponse").Return(`{`, http.StatusOK)
 
