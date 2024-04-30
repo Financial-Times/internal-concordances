@@ -38,10 +38,14 @@ workflows:
       - ft-golang-ci/build-and-test:
           name: build-and-test-project
           executor-name: ft-golang-ci/default
+          context:
+            - cm-team-github
       - ft-golang-ci/docker-build:
           name: build-docker-image
           requires:
             - build-and-test-project
+          context:
+            - cm-team-github
       - dredd
   snyk-scanning:
     jobs:
