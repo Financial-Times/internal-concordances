@@ -42,8 +42,7 @@ workflows:
           name: build-docker-image
           requires:
             - build-and-test-project
-      - dredd:
-          name: dredd
+      - dredd
   snyk-scanning:
     jobs:
       - ft-golang-ci/scan:
