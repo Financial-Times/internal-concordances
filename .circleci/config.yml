@@ -46,7 +46,10 @@ workflows:
             - build-and-test-project
           context:
             - cm-team-github
-      - dredd
+      - dredd:
+          name: dredd
+          context:
+            - cm-team-github
   snyk-scanning:
     jobs:
       - ft-golang-ci/scan:
